@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Center",
+  "version": "0.1",
+  "description": "For staying in touch with my famiy.",
+  "background": {
+    "service_worker": "./background.js"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
+  "author": "Joseph Tey",
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "short_name": "Center"
+}
