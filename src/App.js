@@ -1,10 +1,12 @@
 /*global chrome*/
 import React, { useEffect, useState } from 'react'
 import './App.css';
-import { Input, Button, Loader, Dimmer } from 'semantic-ui-react'
+import { Button, Loader, Dimmer } from 'semantic-ui-react'
 import firebase from './firebase'
 import "firebase/auth";
 import styled from 'styled-components'
+import AuthScreen from './screens/authScreen'
+import Main from './screens/main'
 import { useToasts } from 'react-toast-notifications';
 
 const Container = styled.div`
@@ -16,89 +18,33 @@ const Container = styled.div`
   gap: 10px;
 `
 
-function Login({
-  onLogin,
-  gotoCreateAccountScreen
-}) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-
-  return (
-    <>
-
-      <Input placeholder='Email' onChange={(e) => {
-        setEmail(e.target.value)
-      }} />
-      <Input type="password" placeholder='Password' onChange={(e) => {
-        setPassword(e.target.value)
-      }} />
-
-      <br />
-      <Button
-        onClick={() => {
-          onLogin(email, password)
-        }}
-      >Login</Button>
-
-      <br />
-      <a
-        onClick={() => {
-          gotoCreateAccountScreen()
-        }}
-      >
-        Create Account
-      </a>
-    </>
-  );
-}
-
-function CreateAccount({
-  onAccountCreate,
-  gotoLoginScreen
-}) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-
-  return (
-    <>
-      <a
-        onClick={() => {
-          gotoLoginScreen()
-        }}
-      >
-        Back
-      </a>
-      <br />
-      <Input placeholder='Email' onChange={(e) => {
-        setEmail(e.target.value)
-      }} />
-      <Input type="password" placeholder='Password' onChange={(e) => {
-        setPassword(e.target.value)
-      }} />
-      <br />
-      <Button
-        onClick={() => {
-          onAccountCreate(email, password)
-        }}
-      >Create Acount</Button>
-    </>
-  )
-}
-
 const App = () => {
-  const [screenMode, setScreenMode] = useState("login")
+  const { addToast } = useToasts();
+
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-
-  const { addToast } = useToasts();
 
   useEffect(() => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
-        setUser(firebase.auth().currentUser)
+
+        firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).get()
+          .then((doc) => {
+            if (doc.exists) {
+              setUser({
+                ...firebase.auth().currentUser,
+                ...doc.data()
+              })
+            } else {
+              addToast("Extra user info doesn't exist", { appearance: 'error' });
+            }
+
+            setLoading(false)
+          }).catch((error) => {
+            addToast(error.message, { appearance: 'error' });
+          });
       }
 
-      setLoading(false)
     });
   }, [])
 
@@ -116,82 +62,16 @@ const App = () => {
     <>
       <Container>
 
-        {!user ?
-
-          <>
-            {screenMode === "login" ?
-              <Login
-                onLogin={(email, password) => {
-                  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-                    .then(() => {
-                      setLoading(true)
-                      return firebase.auth().signInWithEmailAndPassword(email, password)
-                        .then((userCredential) => {
-
-                          let authUser = userCredential.user;
-                          setUser(authUser)
-                          setLoading(false)
-                        })
-                        .catch((error) => {
-                          addToast(error.message, { appearance: 'error' });
-                          setLoading(false)
-                        });
-                    })
-                    .catch((error) => {
-                      addToast(error.message, { appearance: 'error' });
-                      setLoading(false)
-                    });
-                }}
-                gotoCreateAccountScreen={() => {
-                  setScreenMode('create-account')
-                }}
-              />
-              : screenMode === 'create-account' ?
-                <CreateAccount
-                  onAccountCreate={(email, password) => {
-                    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-                      .then(() => {
-                        setLoading(true)
-                        return firebase.auth().createUserWithEmailAndPassword(email, password)
-                          .then((userCredential) => {
-                            let authUser = userCredential.user;
-                            setUser(authUser)
-                            setLoading(false)
-                          })
-                          .catch((error) => {
-                            addToast(error.message, { appearance: 'error' });
-                            setLoading(false)
-                          });
-                      }).catch((error) => {
-                        addToast(error.message, { appearance: 'error' });
-                        setLoading(false)
-                      });
-                  }}
-                  gotoLoginScreen={() => {
-                    setScreenMode('login')
-                  }}
-                />
-                : null
-            }
-          </>
-
-
-          :
-
-          <>
-            <div>Logged in as {firebase.auth().currentUser.email}</div>
-
-            <Button
-              onClick={async () => {
-                firebase.auth().signOut()
-                setUser(null)
-              }}
-            >
-              Sign-Out
-              </Button>
-          </>
-
-        }
+        <AuthScreen
+          setLoading={setLoading}
+          setUser={setUser}
+          user={user}
+        >
+          <Main
+            user={user}
+            setUser={setUser}
+          />
+        </AuthScreen>
 
       </Container>
     </>
