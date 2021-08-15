@@ -43,6 +43,8 @@ const App = () => {
           }).catch((error) => {
             addToast(error.message, { appearance: 'error' });
           });
+      } else {
+        setLoading(false)
       }
 
     });
