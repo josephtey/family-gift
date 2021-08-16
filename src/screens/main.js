@@ -7,6 +7,7 @@ import Clock from 'react-live-clock';
 import styled from 'styled-components'
 import axios from 'axios'
 import { useToasts } from 'react-toast-notifications';
+import UserCard from '../components/followedUserCard'
 
 const TopRightBar = styled.div`
   position: absolute;
@@ -16,7 +17,7 @@ const TopRightBar = styled.div`
 
 const TopRightBarInner = styled.div`
   display: flex;
-  gap: 20px;
+  gap: 10px;
   align-items: center;
   height: 40px;
 `
@@ -37,6 +38,20 @@ const Main = ({
   const [open, setOpen] = useState(false)
   const [followedUsers, setFollowedUsers] = useState([])
 
+  const getFollowedUsers = async () => {
+    const tempFriends = []
+    const friends = await firebase.firestore().collection("friends").where("mainUser", "==", user.email).get()
+    friends.forEach(doc => tempFriends.push(doc.data().otherUser))
+
+    const tempFriendInfo = []
+    for (let i = 0; i < tempFriends.length; i++) {
+      let friendInfo = await firebase.firestore().collection("users").where("email", "==", tempFriends[i]).get()
+      friendInfo.forEach(doc => tempFriendInfo.push(doc.data()))
+    }
+
+    setFollowedUsers(tempFriendInfo)
+  }
+
   useEffect(() => {
 
     const getWeather = async () => {
@@ -46,30 +61,6 @@ const Main = ({
         main: response.data.main,
         weather: response.data.weather
       })
-    }
-
-    const getFollowedUsers = async () => {
-      const tempFriends = []
-      firebase.firestore().collection("friends").where("mainUser", "==", user.email).get()
-        .then(friendQuery => {
-          friendQuery.forEach(friend => {
-            firebase.firestore().collection("users").where("email", "==", friend.data().otherUser).get()
-              .then(userQuery => {
-
-                userQuery.forEach(friendInfo => {
-                  tempFriends.push(friendInfo.data())
-                })
-
-              })
-              .catch(error => {
-                addToast(error.message, { appearance: 'error' });
-              })
-          })
-        }).catch(error => {
-          addToast(error.message, { appearance: 'error' });
-        })
-
-      setFollowedUsers(tempFriends)
     }
 
     getWeather()
@@ -82,6 +73,12 @@ const Main = ({
         <TopRightBar>
           <TopRightBarInner>
             <div>{user.email}</div>
+
+            <Button
+              onClick={() => {
+                setOpen(true)
+              }}
+            >Follow User</Button>
             <Button
               onClick={async () => {
                 firebase.auth().signOut()
@@ -96,11 +93,10 @@ const Main = ({
 
         {followedUsers.map((user, i) => {
           return (
-            <Segment key={i}>
-              <p>{user.name} </p>
-              <p>{user.location}</p>
-              <p>{user.timezone}</p>
-            </Segment>
+            <UserCard
+              user={user}
+              index={i}
+            />
           )
         })}
 
@@ -108,7 +104,6 @@ const Main = ({
           onClose={() => setOpen(false)}
           onOpen={() => setOpen(true)}
           open={open}
-          trigger={<Button>Follow User</Button>}
         >
           <Modal.Header>Find User</Modal.Header>
           <Modal.Content>
@@ -130,6 +125,8 @@ const Main = ({
                         })
                           .then(() => {
                             addToast('User followed!', { appearance: 'success' });
+
+                            getFollowedUsers()
                             setOpen(false)
                           })
                           .catch((error) => {
