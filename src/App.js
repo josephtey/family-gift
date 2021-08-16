@@ -53,9 +53,9 @@ const App = () => {
   if (loading) {
     return (
       <Container >
-        <Dimmer active inverted>
+        {/* <Dimmer active inverted>
           <Loader inverted />
-        </Dimmer>
+        </Dimmer> */}
       </Container>
     )
   }

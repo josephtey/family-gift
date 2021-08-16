@@ -3,12 +3,47 @@ import React, { useEffect, useState } from 'react'
 import { Button, Header, Segment, Input, Modal } from 'semantic-ui-react'
 import firebase from '../firebase'
 import "firebase/auth";
+import "firebase/storage";
 import Clock from 'react-live-clock';
 import styled from 'styled-components'
 import axios from 'axios'
 import { useToasts } from 'react-toast-notifications';
 import UserCard from '../components/followedUserCard'
 
+const Container = styled.div`
+  background: url("${props => props.bgurl}") no-repeat center center fixed;
+  background-repeat: no-repeat center center fixed;;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  animation: fade-in-scale-down 0.4s ease-out 1;
+  -webkit-animation: fade-in-scale-down 0.4s ease-in-out 1;
+  -moz-animation:    fade-in-scale-down 0.4s ease-in-out 1;
+  -o-animation:      fade-in-scale-down 0.4s ease-in-out 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  @keyframes fade-in-scale-down{
+    0%{
+      opacity:0;
+      -webkit-transform:scale(1.1);
+      -ms-transform:scale(1.1);
+      transform:scale(1.1)
+    }
+    
+    100%{
+      opacity:1;
+      -webkit-transform:scale(1);
+      -ms-transform:scale(1);
+      transform:scale(1);
+    }
+  }
+`
 const TopRightBar = styled.div`
   position: absolute;
   top: 5px;
@@ -37,6 +72,7 @@ const Main = ({
   const [followEmail, setFollowEmail] = useState('')
   const [open, setOpen] = useState(false)
   const [followedUsers, setFollowedUsers] = useState([])
+  const [backgroundURL, setBackgroundURL] = useState(null)
 
   const getFollowedUsers = async () => {
     const tempFriends = []
@@ -63,13 +99,35 @@ const Main = ({
       })
     }
 
+    const downloadWallpaper = async () => {
+      const storageRef = firebase.storage().ref('wallpapers')
+
+      function setBackground(imageRef) {
+        imageRef.getDownloadURL().then(function (url) {
+          setBackgroundURL(url)
+        }).catch(function (error) {
+          addToast(error.message, { appearance: 'error' });
+        });
+      }
+
+      storageRef.listAll()
+        .then((res) => {
+          res.items.forEach(async (imageRef) => {
+            setBackground(imageRef)
+          });
+        }).catch((error) => {
+          addToast(error.message, { appearance: 'error' });
+        });
+    }
+
+    downloadWallpaper()
     getWeather()
     getFollowedUsers()
   }, [])
 
-  if (user) {
+  if (user && backgroundURL) {
     return (
-      <>
+      <Container bgurl={backgroundURL}>
         <TopRightBar>
           <TopRightBarInner>
             <div>{user.email}</div>
@@ -154,7 +212,7 @@ const Main = ({
         }} />
         <Header>Good Morning, {user.name}</Header>
         <Segment>{user.location} | {user.timezone} | {weather ? <>{weather.main.temp}&deg;C</> : null}</Segment>
-      </>
+      </Container>
     )
   } else {
     return null
