@@ -5,8 +5,7 @@ import { useToasts } from 'react-toast-notifications';
 import { Input, Button, Form } from 'semantic-ui-react'
 import styled from 'styled-components'
 import TimezoneSelect from 'react-timezone-select'
-
-
+import Autocomplete from "react-google-autocomplete";
 
 
 const FormContainer = styled.div`
@@ -28,7 +27,9 @@ const CreateAccount = ({
 
   const [email, setEmail] = useState("")
   const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone)
+  const [location, setLocation] = useState("")
   const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
 
   return (
     <FormContainer>
@@ -47,6 +48,25 @@ const CreateAccount = ({
           <Input id="email" placeholder='Email' onChange={(e) => {
             setEmail(e.target.value)
           }} />
+        </Form.Field>
+
+        <Form.Field>
+          <Input id="name" placeholder='Name' onChange={(e) => {
+            setName(e.target.value)
+          }} />
+        </Form.Field>
+
+        <Form.Field>
+          <Autocomplete
+            placeholder="Enter a city/suburb"
+            apiKey={"AIzaSyAoo4AxObgyDTt93omLUjila-ircLZX5_s"}
+            onPlaceSelected={(place) => {
+              const country = place.address_components.find(item => item.types.includes('country')).short_name
+              const main = place.address_components[0].long_name
+
+              setLocation(`${main}, ${country}`)
+            }}
+          />
         </Form.Field>
 
         <Form.Field>
@@ -69,15 +89,19 @@ const CreateAccount = ({
                 setLoading(true)
                 return firebase.auth().createUserWithEmailAndPassword(email, password)
                   .then((userCredential) => {
-                    let authUser = userCredential.user;
+                    const authUser = userCredential.user;
+                    const extraUserInfo = {
+                      timezone: timezone.value ? timezone.value : timezone,
+                      name,
+                      email,
+                      location
+                    }
 
-                    firebase.firestore().collection("users").doc(userCredential.user.uid).set({
-                      timezone: timezone.value ? timezone.value : timezone
-                    })
-                      .then(() => {
+                    firebase.firestore().collection("users").doc(userCredential.user.uid).set(extraUserInfo)
+                      .then((doc) => {
                         setUser({
                           ...authUser,
-                          timezone: timezone.value ? timezone.value : timezone
+                          ...extraUserInfo
                         })
 
                         setLoading(false)
