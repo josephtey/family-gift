@@ -1,3 +1,21 @@
+@font-face {
+  font-family: "ProductSansBold";
+  src: url('./assets/product-sans-bold.ttf')
+ }
+
+ @font-face {
+  font-family: "ProductSansRegular";
+  src: url('./assets/product-sans-regular.ttf')
+ }
+ @font-face {
+  font-family: "ProductSansItalic";
+  src: url('./assets/product-sans-italic.ttf')
+ }
+ @font-face {
+  font-family: "ProductSansBoldItalic";
+  src: url('./assets/product-sans-bold-italic.ttf')
+ }
+
 
 body {
   margin: 0;
@@ -6,7 +24,6 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #1A1B1F !important;
 }
 
 html, body {

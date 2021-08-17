@@ -11,12 +11,6 @@ import { useToasts } from 'react-toast-notifications';
 import UserCard from '../components/followedUserCard'
 
 const Container = styled.div`
-  background: url("${props => props.bgurl}") no-repeat center center fixed;
-  background-repeat: no-repeat center center fixed;;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
   animation: fade-in-scale-down 0.4s ease-out 1;
   -webkit-animation: fade-in-scale-down 0.4s ease-in-out 1;
   -moz-animation:    fade-in-scale-down 0.4s ease-in-out 1;
@@ -24,8 +18,6 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
 
   @keyframes fade-in-scale-down{
@@ -57,10 +49,76 @@ const TopRightBarInner = styled.div`
   height: 40px;
 `
 
-const FollowedUsers = styled.div`
+const CoverPhoto = styled.div`
+  background-image: url("${props => props.bgurl}");
+  background-repeat: no-repeat center center fixed;
+  background-position: center;
+  background-size: cover;
+  flex: 1.2;
+`
+
+const MainScreen = styled.div`
+  flex: 1.5;
+  display: flex;
+  background: white;
+  padding: 10px 150px;
+  align-items: center;
+  justify-content: space-between;
+  color: #545454;
+`
+
+const GreetingMessage = styled.div`
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 23px;
+`
+
+const Greeting = styled.div`
+  font-family: ProductSansRegular;
+  font-size: 30px;
+`
+
+const Name = styled.div`
+  font-family: ProductSansBold;
+  font-size: 40px;
+`
+
+const Weather = styled.div`
+  display: flex;
+  align-items: center;
+`
+const Temperature = styled.div`
+  font-family: ProductSansBold;
+  font-size: 45px;
+`
+
+const WeatherDesc = styled.div`
+  flex-direction: column;
+  display: flex;
+  text-align: center;
+  padding: 0 15px;
+`
+
+const WeatherLocation = styled.div`
+  font-family: ProductSansRegular;
+  font-size:17px;
+`
+
+const WeatherType = styled.div`
+  font-family: ProductSansBold;
+  font-size: 17px;
+`
+
+const FriendCards = styled.div`
+  flex: 0.8 ;
+  background: #F4F4F4;
+  padding: 25px 150px;
   display: flex;
   gap: 30px;
 `
+
+
 
 const Main = ({
   user,
@@ -104,6 +162,7 @@ const Main = ({
 
       function setBackground(imageRef) {
         imageRef.getDownloadURL().then(function (url) {
+          console.log(url)
           setBackgroundURL(url)
         }).catch(function (error) {
           addToast(error.message, { appearance: 'error' });
@@ -125,39 +184,9 @@ const Main = ({
     getFollowedUsers()
   }, [])
 
-  if (user && backgroundURL) {
+  if (user) {
     return (
-      <Container bgurl={backgroundURL}>
-        <TopRightBar>
-          <TopRightBarInner>
-            <div>{user.email}</div>
-
-            <Button
-              onClick={() => {
-                setOpen(true)
-              }}
-            >Follow User</Button>
-            <Button
-              onClick={async () => {
-                firebase.auth().signOut()
-                setUser(null)
-              }}
-            >
-              Sign-Out
-            </Button>
-
-          </TopRightBarInner>
-        </TopRightBar>
-
-        {followedUsers.map((user, i) => {
-          return (
-            <UserCard
-              user={user}
-              index={i}
-            />
-          )
-        })}
-
+      <Container>
         <Modal
           onClose={() => setOpen(false)}
           onOpen={() => setOpen(true)}
@@ -205,13 +234,86 @@ const Main = ({
           </Button>
           </Modal.Actions>
         </Modal>
+        <TopRightBar>
+          <TopRightBarInner>
+            <div>{user.email}</div>
 
-        <br />
+            <Button
+              onClick={() => {
+                setOpen(true)
+              }}
+            >Follow User</Button>
+            <Button
+              onClick={async () => {
+                firebase.auth().signOut()
+                setUser(null)
+              }}
+            >
+              Sign-Out
+            </Button>
+
+          </TopRightBarInner>
+        </TopRightBar>
+
+
+        <CoverPhoto bgurl={backgroundURL} />
+        <MainScreen>
+          <GreetingMessage>
+            <Greeting>
+              Good Morning
+            </Greeting>
+            <Name>
+              {user.name}
+            </Name>
+          </GreetingMessage>
+          <Clock format={'h:mm'} ticking={true} timezone={user.timezone} style={{
+            fontFamily: 'productSansBold',
+            fontSize: '80px'
+          }} />
+          <Weather>
+            <Temperature>
+              {weather ? Math.round(weather.main.temp) : null}&deg;
+            </Temperature>
+            <WeatherDesc>
+              <WeatherLocation>
+                {user.location.split(",")[0]}
+              </WeatherLocation>
+              <WeatherType>
+                Partly Cloudy
+              </WeatherType>
+            </WeatherDesc>
+
+          </Weather>
+        </MainScreen>
+        <FriendCards>
+          {followedUsers.map((user, i) => {
+            return (
+              <UserCard
+                user={user}
+                index={i}
+              />
+            )
+          })}
+
+        </FriendCards>
+        {/*
+        {followedUsers.map((user, i) => {
+          return (
+            <UserCard
+              user={user}
+              index={i}
+            />
+          )
+        })}
+
+        
+
+         <br />
         <Clock format={'h:mm A'} ticking={true} timezone={user.timezone} style={{
           fontSize: '60px'
         }} />
         <Header>Good Morning, {user.name}</Header>
-        <Segment>{user.location} | {user.timezone} | {weather ? <>{weather.main.temp}&deg;C</> : null}</Segment>
+        <Segment>{user.location} | {user.timezone} | {weather ? <>{weather.main.temp}&deg;C</> : null}</Segment> */}
       </Container>
     )
   } else {

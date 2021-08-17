@@ -4,10 +4,35 @@ import axios from 'axios'
 import styled from 'styled-components'
 import Clock from 'react-live-clock';
 
-const Container = styled(Segment)`
-  p {
-    font-size: 20px;
+
+const Card = styled.div`
+  height: 100%;
+  width: 33%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: white;
+  font-family: ProductSansRegular;
+  font-size: 18px;
+  color: #545454;
+  padding: 30px;
+  box-shadow: 0 0 12px -2px rgba(0,0,0,0.05);
+
+  b {
+    font-family: ProductSansBold;
   }
+`
+
+const CardWeather = styled.div`
+  font-family: ProductSansBold;
+  font-size: 40px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-bottom: 10px;
 `
 
 const UserCard = ({
@@ -30,11 +55,28 @@ const UserCard = ({
 
   }, [])
   return (
-    <Container>
-      <p>At {user.location.split(",")[0]}, it is currently <Clock format={'h:mm A'} ticking={true} timezone={user.timezone} />.</p>
-      <p>{user.name} is probably sleeping, while thinking about you :)</p>
-      <p>It's currently {weather ? <>{weather.main.temp}&deg;C</> : null}</p>
-    </Container>
+    <>
+      <Card>
+        <p>
+          It’s <b><Clock format={'h:mm A'} ticking={true} timezone={user.timezone} /></b> at <b>{user.location.split(",")[0]}</b>. <br />
+          <b>{user.name}</b> is currently sleeping, dreaming about his future wife.
+        </p>
+      </Card>
+      <Card>
+        <CardWeather>
+          {weather ? Math.round(weather.main.temp) : null}&deg;
+        </CardWeather>
+        <p style={{ fontSize: '15px' }}>
+          Today’s weather at <b>{user.location.split(",")[0]}</b> is fantabulous, hopefully Joe’s outside kicking a soccer ball.
+        </p>
+      </Card>
+      {/* <Card>
+        <p>
+          It’s <b>5:45 AM</b> at <b>San Francisco</b>. <br />
+          <b>Joseph</b> is currently sleeping, dreaming about his future wife.
+        </p>
+      </Card> */}
+    </>
   )
 }
 
