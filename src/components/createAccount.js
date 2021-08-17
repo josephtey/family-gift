@@ -1,3 +1,4 @@
+/*global chrome*/
 import React, { useState } from 'react'
 import firebase from '../firebase'
 import "firebase/auth";
@@ -103,6 +104,10 @@ const CreateAccount = ({
                           ...authUser,
                           ...extraUserInfo
                         })
+
+                        chrome.storage.sync.set({
+                          user: extraUserInfo
+                        });
 
                         setLoading(false)
                         addToast('You have successfully created your account!', { appearance: 'success' });

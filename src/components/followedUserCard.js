@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Segment } from 'semantic-ui-react'
 import axios from 'axios'
 import styled from 'styled-components'
 import Clock from 'react-live-clock';
 
-
 const Card = styled.div`
+  opacity: 0;
+  transition: opacity 2s ease;
   height: 100%;
   width: 33%;
   display: flex;
@@ -32,7 +32,12 @@ const CardWeather = styled.div`
   flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   padding-bottom: 10px;
+`
+
+const WeatherIcon = styled.img`
+
 `
 
 const UserCard = ({
@@ -40,6 +45,7 @@ const UserCard = ({
 }) => {
 
   const [weather, setWeather] = useState(null)
+  const [onLoad, setOnLoad] = useState(false)
 
   useEffect(() => {
     const getWeather = async () => {
@@ -51,21 +57,27 @@ const UserCard = ({
       })
     }
 
+    setTimeout(() => {
+      setOnLoad(true)
+    }, 100)
     getWeather()
 
   }, [])
   return (
     <>
-      <Card>
+      <Card className={onLoad ? "fade-in" : ""}>
         <p>
           It’s <b><Clock format={'h:mm A'} ticking={true} timezone={user.timezone} /></b> at <b>{user.location.split(",")[0]}</b>. <br />
           <b>{user.name}</b> is currently sleeping, dreaming about his future wife.
         </p>
       </Card>
-      <Card>
-        <CardWeather>
-          {weather ? Math.round(weather.main.temp) : null}&deg;
-        </CardWeather>
+      <Card className={weather ? "fade-in" : ""}>
+        {weather ?
+          <CardWeather>
+            <div>{Math.round(weather.main.temp)}&deg;</div>
+            <WeatherIcon src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} width="50px" height="50px" />
+          </CardWeather>
+          : null}
         <p style={{ fontSize: '15px' }}>
           Today’s weather at <b>{user.location.split(",")[0]}</b> is fantabulous, hopefully Joe’s outside kicking a soccer ball.
         </p>

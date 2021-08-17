@@ -25,37 +25,57 @@ const App = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
-
-        firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).get()
-          .then((doc) => {
-            if (doc.exists) {
-              setUser({
-                ...firebase.auth().currentUser,
-                ...doc.data()
-              })
-            } else {
-              addToast("Extra user info doesn't exist", { appearance: 'error' });
-            }
-
-            setLoading(false)
-          }).catch((error) => {
-            addToast(error.message, { appearance: 'error' });
-          });
-      } else {
-        setLoading(false)
+    chrome.storage.sync.get("user", data => {
+      if (data.user) {
+        setUser(data.user)
       }
+    })
 
-    });
+    // setUser({
+    //   email: 'joetey@stanford.edu',
+    //   name: 'Joseph Tey',
+    //   timezone: 'America/Los_Angeles',
+    //   location: 'San Francisco,US'
+    // })
+    // firebase.auth().onAuthStateChanged(function (user) {
+    //   if (user) {
+
+    //     firebase.firestore().collection("users").doc(firebase.auth().currentUser.uid).get()
+    //       .then((doc) => {
+    //         if (doc.exists) {
+    //           // setUser({
+    //           //   ...firebase.auth().currentUser,
+    //           //   ...doc.data()
+    //           // })
+
+
+    //         } else {
+    //           addToast("Extra user info doesn't exist", { appearance: 'error' });
+    //         }
+
+    //         setLoading(false)
+    //       }).catch((error) => {
+    //         addToast(error.message, { appearance: 'error' });
+    //       });
+    //   } else {
+    //     setLoading(false)
+    //   }
+
+    // });
   }, [])
+
+  useEffect(() => {
+    if (user) {
+      setLoading(false)
+    }
+  }, [user])
 
   if (loading) {
     return (
       <Container >
-        {/* <Dimmer active inverted>
+        <Dimmer active inverted>
           <Loader inverted />
-        </Dimmer> */}
+        </Dimmer>
       </Container>
     )
   }

@@ -9,9 +9,15 @@ import styled from 'styled-components'
 import axios from 'axios'
 import { useToasts } from 'react-toast-notifications';
 import UserCard from '../components/followedUserCard'
+import { BackgroundImage } from 'react-image-and-background-image-fade'
 
+const CoverPhotoImage = styled(BackgroundImage)`
+  background-repeat: no-repeat center center fixed;
+  background-position: center;
+  background-size: cover;
+`
 const Container = styled.div`
-  animation: fade-in-scale-down 0.4s ease-out 1;
+  animation: fade-in-scale-down 0.2s ease-out 1;
   -webkit-animation: fade-in-scale-down 0.4s ease-in-out 1;
   -moz-animation:    fade-in-scale-down 0.4s ease-in-out 1;
   -o-animation:      fade-in-scale-down 0.4s ease-in-out 1;
@@ -35,6 +41,47 @@ const Container = styled.div`
       transform:scale(1);
     }
   }
+
+  .coverPhoto {
+    transition: flex 0.5s ease;
+  }
+
+  .coverPhoto:hover {
+    flex: 2.2;
+    transition: flex 0.5s ease;
+  }
+
+  .friendCards {
+    transition: flex 0.5s ease;
+  }
+
+  .friendCards:hover {
+    flex: 0.9;
+    transition: flex 0.5s ease;
+  }
+
+  .greeting:hover a {
+    opacity: 0.5;
+  }
+
+  .greeting a {
+    opacity: 0;
+  }
+
+  .greeting {
+    margin-bottom: 30px;
+    transition: margin-bottom 0.5s ease;
+  }
+
+  .greeting:hover {
+    margin-bottom: 0px;
+    transition: margin-bottom 0.5s ease;
+  }
+
+  .fade-in {
+    opacity: 1;
+    transition: opacity 1s ease;
+  }
 `
 const TopRightBar = styled.div`
   position: absolute;
@@ -50,11 +97,13 @@ const TopRightBarInner = styled.div`
 `
 
 const CoverPhoto = styled.div`
-  background-image: url("${props => props.bgurl}");
-  background-repeat: no-repeat center center fixed;
-  background-position: center;
-  background-size: cover;
-  flex: 1.2;
+  flex: 1;
+  animation: fadein 2s;
+
+  @keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
 `
 
 const MainScreen = styled.div`
@@ -65,6 +114,7 @@ const MainScreen = styled.div`
   align-items: center;
   justify-content: space-between;
   color: #545454;
+  flex: 1;
 `
 
 const GreetingMessage = styled.div`
@@ -72,6 +122,7 @@ const GreetingMessage = styled.div`
   flex-direction: column;
   text-align: left;
   gap: 23px;
+  flex: 1;
 `
 
 const Greeting = styled.div`
@@ -87,10 +138,19 @@ const Name = styled.div`
 const Weather = styled.div`
   display: flex;
   align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+  opacity: 0;
 `
 const Temperature = styled.div`
   font-family: ProductSansBold;
   font-size: 45px;
+  flex-direction: row;
+  gap: 10px;
+`
+
+const WeatherIcon = styled.img`
+
 `
 
 const WeatherDesc = styled.div`
@@ -111,11 +171,27 @@ const WeatherType = styled.div`
 `
 
 const FriendCards = styled.div`
-  flex: 0.8 ;
+  flex: 0.7 ;
   background: #F4F4F4;
   padding: 25px 150px;
   display: flex;
   gap: 30px;
+`
+
+const ActionLinks = styled.div`
+  font-family: ProductSansRegular;
+
+  a {
+    color: black;
+    opacity: 0.3;
+    transition: opacity 0.5s ease;
+  }
+
+  a:hover {
+    opacity: 0.7;
+    transition: opacity 0.5s ease;
+  }
+  
 `
 
 
@@ -131,6 +207,7 @@ const Main = ({
   const [open, setOpen] = useState(false)
   const [followedUsers, setFollowedUsers] = useState([])
   const [backgroundURL, setBackgroundURL] = useState(null)
+  const [onLoad, setOnLoad] = useState(false)
 
   const getFollowedUsers = async () => {
     const tempFriends = []
@@ -150,6 +227,8 @@ const Main = ({
 
     const getWeather = async () => {
       const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${user.location}&appid=311bafebdf0eea75bbc8bf0076efb2b0&units=metric`)
+
+      console.log(response.data)
 
       setWeather({
         main: response.data.main,
@@ -179,9 +258,12 @@ const Main = ({
         });
     }
 
-    downloadWallpaper()
     getWeather()
     getFollowedUsers()
+
+    setTimeout(() => {
+      setOnLoad(true)
+    }, 0)
   }, [])
 
   if (user) {
@@ -234,7 +316,7 @@ const Main = ({
           </Button>
           </Modal.Actions>
         </Modal>
-        <TopRightBar>
+        {/* <TopRightBar>
           <TopRightBarInner>
             <div>{user.email}</div>
 
@@ -253,12 +335,20 @@ const Main = ({
             </Button>
 
           </TopRightBarInner>
-        </TopRightBar>
+        </TopRightBar> */}
 
 
-        <CoverPhoto bgurl={backgroundURL} />
+        <CoverPhoto className="coverPhoto">
+          <CoverPhotoImage src='https://firebasestorage.googleapis.com/v0/b/family-gift-85cf0.appspot.com/o/wallpapers%2Fwallpaperflare.com_wallpaper.jpg?alt=media&token=81f5fc30-45ad-4891-a4d3-32a757bb99f7' width="100%" height="100%" />
+        </CoverPhoto>
         <MainScreen>
-          <GreetingMessage>
+          <GreetingMessage className="greeting">
+            <ActionLinks>
+              <a onClick={() => {
+                firebase.auth().signOut()
+                setUser(null)
+              }}>Sign Out</a>
+            </ActionLinks>
             <Greeting>
               Good Morning
             </Greeting>
@@ -270,10 +360,12 @@ const Main = ({
             fontFamily: 'productSansBold',
             fontSize: '80px'
           }} />
-          <Weather>
-            <Temperature>
-              {weather ? Math.round(weather.main.temp) : null}&deg;
-            </Temperature>
+          <Weather className={weather ? "fade-in" : ""}>
+            {weather ?
+              <Temperature>
+                <p>{Math.round(weather.main.temp)}&deg;</p>
+              </Temperature>
+              : null}
             <WeatherDesc>
               <WeatherLocation>
                 {user.location.split(",")[0]}
@@ -282,10 +374,13 @@ const Main = ({
                 Partly Cloudy
               </WeatherType>
             </WeatherDesc>
+            {weather ?
+              <WeatherIcon src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} width="50px" height="50px" />
+              : null}
 
           </Weather>
         </MainScreen>
-        <FriendCards>
+        <FriendCards className="friendCards">
           {followedUsers.map((user, i) => {
             return (
               <UserCard

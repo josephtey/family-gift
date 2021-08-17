@@ -1,3 +1,4 @@
+/*global chrome*/
 import React, { useState } from 'react'
 import firebase from '../firebase'
 import "firebase/auth";
@@ -55,6 +56,9 @@ const Login = ({
                           ...authUser,
                           ...doc.data()
                         })
+                        chrome.storage.sync.set({
+                          user: doc.data()
+                        });
                         setLoading(false)
                       } else {
                         setLoading(false)
