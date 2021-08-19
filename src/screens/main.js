@@ -332,7 +332,9 @@ const Main = ({
   const getFollowedUsers = async () => {
     const tempFriends = []
     const friends = await firebase.firestore().collection("friends").where("mainUser", "==", user.email).get()
-    friends.forEach(doc => tempFriends.push(doc.data().otherUser))
+    friends.forEach(doc => {
+      tempFriends.push(doc.data().otherUser);
+    })
 
     const tempFriendInfo = []
     for (let i = 0; i < tempFriends.length; i++) {
@@ -341,6 +343,51 @@ const Main = ({
     }
 
     setFollowedUsers(tempFriendInfo)
+  }
+
+  const fetchHighlight = async () => {
+
+    let highlight = null
+    const highlights = await firebase.firestore().collection("highlights").where("user", "==", user.email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: user.timezone })).get()
+    highlights.forEach(doc => highlight = doc.data().highlight)
+
+    setHighlight(highlight)
+
+    if (highlight) {
+      setHighlightExists(true)
+    }
+  }
+
+
+  const updateHighlight = async (newHighlight) => {
+
+    let todayhighlightID = null
+    const highlights = await firebase.firestore().collection("highlights").where("user", "==", user.email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: user.timezone })).get()
+    highlights.forEach(doc => todayhighlightID = doc.id)
+
+    if (todayhighlightID) {
+      const docRef = firebase.firestore().collection("highlights").doc(todayhighlightID)
+      firebase.firestore().runTransaction((transaction) => {
+        return transaction.get(docRef).then((doc) => {
+          if (!doc.exists) {
+            addToast('Error, highlight does not exist', { appearance: 'error' })
+          }
+
+          transaction.update(docRef, { highlight: newHighlight })
+        })
+      }).then(() => {
+        console.log("Transaction successfully committed!");
+      }).catch((error) => {
+        addToast(error.message, { appearance: 'error' })
+      });
+    } else {
+      firebase.firestore().collection("highlights").add({
+        user: user.email,
+        date: new Date().toLocaleDateString("en-AU", { timeZone: user.timezone }),
+        highlight: newHighlight
+      })
+    }
+
   }
 
   useEffect(() => {
@@ -380,6 +427,7 @@ const Main = ({
 
     getWeather()
     getFollowedUsers()
+    fetchHighlight()
 
     setTimeout(() => {
       setOnLoad(true)
@@ -470,6 +518,7 @@ const Main = ({
               }}
               onSubmit={() => {
                 if (highlight.length != 0) {
+                  updateHighlight(highlight)
                   setHighlightExists(true)
                 } else {
                   setHighlightExists(false)
@@ -477,6 +526,7 @@ const Main = ({
               }}
               onBlur={() => {
                 if (highlight.length != 0) {
+                  updateHighlight(highlight)
                   setHighlightExists(true)
                 } else {
                   setHighlightExists(false)
@@ -485,6 +535,7 @@ const Main = ({
             >
               <Form.Field>
                 <FocusInput
+                  value={highlight}
                   disabled={highlightExists ? true : false} className={`focus-input ${highlightExists ? "animate-in" : ""}`} placeholder="What is your focus today?" onChange={(e) => {
                     setHighlight(e.target.value)
                   }}
@@ -516,6 +567,7 @@ const Main = ({
             <ActionLinks>
               <a onClick={() => {
                 firebase.auth().signOut()
+                chrome.storage.local.clear()
                 setUser(null)
               }}>Sign Out</a>
             </ActionLinks>

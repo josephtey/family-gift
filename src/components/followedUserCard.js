@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import firebase from '../firebase'
 import styled from 'styled-components'
 import Clock from 'react-live-clock';
 
@@ -46,6 +47,7 @@ const UserCard = ({
 }) => {
 
   const [weather, setWeather] = useState(null)
+  const [highlight, setHighlight] = useState(null)
   const [onLoad, setOnLoad] = useState(false)
 
   useEffect(() => {
@@ -58,9 +60,17 @@ const UserCard = ({
       })
     }
 
+    const getHighlight = async () => {
+
+      const highlights = await firebase.firestore().collection("highlights").where("user", "==", user.email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: user.timezone })).get()
+      highlights.forEach(doc => setHighlight(doc.data().highlight))
+    }
+
     setTimeout(() => {
       setOnLoad(true)
     }, 100)
+
+    getHighlight()
     getWeather()
 
   }, [])
@@ -83,12 +93,12 @@ const UserCard = ({
           Today’s weather at <b>{user.location.split(",")[0]}</b> is fantabulous, hopefully Joe’s outside kicking a soccer ball.
         </p>
       </Card>
-      {/* <Card>
+      <Card className={highlight ? "fade-in" : ""}>
         <p>
-          It’s <b>5:45 AM</b> at <b>San Francisco</b>. <br />
-          <b>Joseph</b> is currently sleeping, dreaming about his future wife.
+          <b>{user.name}'s</b> main focus today is: <br />
+          {highlight}
         </p>
-      </Card> */}
+      </Card>
     </>
   )
 }
