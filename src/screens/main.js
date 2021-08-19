@@ -1,6 +1,6 @@
 /*global chrome*/
-import React, { useEffect, useState } from 'react'
-import { Button, Header, Segment, Input, Modal } from 'semantic-ui-react'
+import React, { useEffect, useState, useRef } from 'react'
+import { Button, Input, Modal, Form } from 'semantic-ui-react'
 import firebase from '../firebase'
 import "firebase/auth";
 import "firebase/storage";
@@ -10,6 +10,7 @@ import axios from 'axios'
 import { useToasts } from 'react-toast-notifications';
 import UserCard from '../components/followedUserCard'
 import { BackgroundImage } from 'react-image-and-background-image-fade'
+import TopOverlayImage from '../assets/top-overlay.png'
 
 const CoverPhotoImage = styled(BackgroundImage)`
   background-repeat: no-repeat center center fixed;
@@ -82,6 +83,15 @@ const Container = styled.div`
     opacity: 1;
     transition: opacity 1s ease;
   }
+
+  .animate-in {
+    animation: fade-in-scale-down 0.2s ease-out 1;
+  }
+
+  .ui.disabled.input, .ui.form .disabled.field, .ui.form .disabled.fields .field, .ui.form .field :disabled {
+    opacity: 1 !important;
+    font-family: ProductSansBold !important;
+  }
 `
 const TopRightBar = styled.div`
   position: absolute;
@@ -97,13 +107,14 @@ const TopRightBarInner = styled.div`
 `
 
 const CoverPhoto = styled.div`
-  flex: 1;
+  flex: 1.2;
   animation: fadein 2s;
 
   @keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 1; }
   }
+  position: relative;
 `
 
 const MainScreen = styled.div`
@@ -171,7 +182,7 @@ const WeatherType = styled.div`
 `
 
 const FriendCards = styled.div`
-  flex: 0.7 ;
+  flex: 0.5;
   background: #F4F4F4;
   padding: 25px 150px;
   display: flex;
@@ -193,8 +204,114 @@ const ActionLinks = styled.div`
   }
   
 `
+const MiddleSection = styled.div`
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  flex: 1;
+`
 
+const Highlight = styled.div`
+  font-family: ProductSansRegular;
+  font-size: 18px;
+  color: #B3B3B3;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`
 
+const Musing = styled.div`
+  font-family: ProductSansRegular;
+  font-size: 15px;
+  color: #B3B3B3;
+  margin-top: 8px;
+`
+
+const TopOverlay = styled.img`
+  width: 100%;
+  z-index: 100;
+  position: absolute;
+  top: 0;
+  left: 0; 
+  height: 300px;
+`
+
+const BottomOverlay = styled.img`
+  transform: scaleY(-1);
+  width: 100%;
+  z-index: 100;
+  position: absolute;
+  bottom: 0;
+  height: 400px;
+`
+
+const MainQuote = styled.div`
+  color: white;
+  font-family: ProductSansRegular;
+  font-size: 15px;
+  position: absolute;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  bottom: 15px;
+  z-index: 1000;
+`
+
+const FocusInput = styled(Input)`
+  width: 30%;
+
+  input, input:active, input:focus {
+    font-family: ProductSansRegular !important;
+    font-size: 15px;
+    border: none !important;
+    text-align: center !important;
+    background: rgba(0,0,0,0) !important;
+    color: white !important;
+    border-radius: 0 !important;
+  }
+  input::selection {
+    background: white;
+    color: black;
+    border-bottom: 1px solid white;
+  }
+
+  input::placeholder {
+    color: rgba(255, 255, 255, 0.3) !important;
+    opacity: 1;
+  }
+`
+
+const TodayHighlight = styled.div`
+  position: absolute;
+  color: white;
+  top: 15px;
+  font-size: 15px;
+  font-family: ProductSansRegular;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex-direction: column;
+`
+
+const FocusSubText = styled.div`
+  opacity: 0;
+  text-transform: uppercase;
+  font-family: ProductSansBold;
+  font-size: 10px;
+  text-align: center;
+  margin-top: -4px;
+  color: rgba(255, 255, 255, 0.8);
+  transition: opacity 1s ease;
+  cursor: ${props => props.pointerCursor ? 'pointer' : 'normal'};
+`
 
 const Main = ({
   user,
@@ -208,6 +325,9 @@ const Main = ({
   const [followedUsers, setFollowedUsers] = useState([])
   const [backgroundURL, setBackgroundURL] = useState(null)
   const [onLoad, setOnLoad] = useState(false)
+  const [highlight, setHighlight] = useState("")
+  const [highlightExists, setHighlightExists] = useState(false)
+  const focusInputRef = useRef()
 
   const getFollowedUsers = async () => {
     const tempFriends = []
@@ -339,6 +459,56 @@ const Main = ({
 
 
         <CoverPhoto className="coverPhoto">
+          <TopOverlay src={TopOverlayImage} />
+          <MainQuote>
+            Sometimes, less is more.
+          </MainQuote>
+          <TodayHighlight>
+            <Form
+              style={{
+                width: '50%'
+              }}
+              onSubmit={() => {
+                if (highlight.length != 0) {
+                  setHighlightExists(true)
+                } else {
+                  setHighlightExists(false)
+                }
+              }}
+              onBlur={() => {
+                if (highlight.length != 0) {
+                  setHighlightExists(true)
+                } else {
+                  setHighlightExists(false)
+                }
+              }}
+            >
+              <Form.Field>
+                <FocusInput
+                  disabled={highlightExists ? true : false} className={`focus-input ${highlightExists ? "animate-in" : ""}`} placeholder="What is your focus today?" onChange={(e) => {
+                    setHighlight(e.target.value)
+                  }}
+                  ref={focusInputRef}
+                />
+
+                <FocusSubText
+                  pointerCursor={highlightExists}
+                  onClick={() => {
+                    if (highlightExists) {
+                      setHighlightExists(false)
+                      setTimeout(() => {
+                        focusInputRef.current.focus()
+                      }, 0)
+                    }
+                  }}
+                  className={highlightExists ? "fade-in" : ""}>
+                  <span>Today's Focus</span>
+                </FocusSubText>
+
+              </Form.Field>
+            </Form>
+          </TodayHighlight>
+          <BottomOverlay src={TopOverlayImage} />
           <CoverPhotoImage src='https://firebasestorage.googleapis.com/v0/b/family-gift-85cf0.appspot.com/o/wallpapers%2Fwallpaperflare.com_wallpaper.jpg?alt=media&token=81f5fc30-45ad-4891-a4d3-32a757bb99f7' width="100%" height="100%" />
         </CoverPhoto>
         <MainScreen>
@@ -356,10 +526,12 @@ const Main = ({
               {user.name}
             </Name>
           </GreetingMessage>
-          <Clock format={'h:mm'} ticking={true} timezone={user.timezone} style={{
-            fontFamily: 'productSansBold',
-            fontSize: '80px'
-          }} />
+          <MiddleSection>
+            <Clock format={'h:mm'} ticking={true} timezone={user.timezone} style={{
+              fontFamily: 'productSansBold',
+              fontSize: '80px'
+            }} />
+          </MiddleSection>
           <Weather className={weather ? "fade-in" : ""}>
             {weather ?
               <Temperature>

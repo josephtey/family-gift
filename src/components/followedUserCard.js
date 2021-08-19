@@ -20,6 +20,7 @@ const Card = styled.div`
   color: #545454;
   padding: 30px;
   box-shadow: 0 0 12px -2px rgba(0,0,0,0.05);
+  flex: 1;
 
   b {
     font-family: ProductSansBold;

@@ -25,18 +25,18 @@ const App = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    chrome.storage.sync.get("user", data => {
-      if (data.user) {
-        setUser(data.user)
-      }
-    })
-
-    // setUser({
-    //   email: 'joetey@stanford.edu',
-    //   name: 'Joseph Tey',
-    //   timezone: 'America/Los_Angeles',
-    //   location: 'San Francisco,US'
+    // chrome.storage.sync.get("user", data => {
+    //   if (data.user) {
+    //     setUser(data.user)
+    //   }
     // })
+
+    setUser({
+      email: 'joetey@stanford.edu',
+      name: 'Joseph Tey',
+      timezone: 'America/Los_Angeles',
+      location: 'San Francisco,US'
+    })
     // firebase.auth().onAuthStateChanged(function (user) {
     //   if (user) {
 
