@@ -10043,6 +10043,11 @@ react-google-autocomplete@^2.4.0:
     lodash.debounce "^4.0.8"
     prop-types "^15.5.0"
 
+react-icons@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-4.2.0.tgz#6dda80c8a8f338ff96a1851424d63083282630d0"
+  integrity sha512-rmzEDFt+AVXRzD7zDE21gcxyBizD/3NqjbX6cmViAgdqfJ2UiLer8927/QhhrXQV7dEj/1EGuOTPp7JnLYVJKQ==
+
 react-image-and-background-image-fade@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/react-image-and-background-image-fade/-/react-image-and-background-image-fade-1.0.6.tgz#96129bc4c9b2a5eeeda75ba7ff9d200d0ef2037b"

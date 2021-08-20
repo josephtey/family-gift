@@ -11,6 +11,7 @@ import { useToasts } from 'react-toast-notifications';
 import UserCard from '../components/followedUserCard'
 import { BackgroundImage } from 'react-image-and-background-image-fade'
 import TopOverlayImage from '../assets/top-overlay.png'
+import { FaTree, FaSignOutAlt } from 'react-icons/fa'
 
 const CoverPhotoImage = styled(BackgroundImage)`
   background-repeat: no-repeat center center fixed;
@@ -43,42 +44,6 @@ const Container = styled.div`
     }
   }
 
-  .coverPhoto {
-    transition: flex 0.5s ease;
-  }
-
-  .coverPhoto:hover {
-    flex: 2.2;
-    transition: flex 0.5s ease;
-  }
-
-  .friendCards {
-    transition: flex 0.5s ease;
-  }
-
-  .friendCards:hover {
-    flex: 0.9;
-    transition: flex 0.5s ease;
-  }
-
-  .greeting:hover a {
-    opacity: 0.5;
-  }
-
-  .greeting a {
-    opacity: 0;
-  }
-
-  .greeting {
-    margin-bottom: 30px;
-    transition: margin-bottom 0.5s ease;
-  }
-
-  .greeting:hover {
-    margin-bottom: 0px;
-    transition: margin-bottom 0.5s ease;
-  }
-
   .fade-in {
     opacity: 1;
     transition: opacity 1s ease;
@@ -93,39 +58,33 @@ const Container = styled.div`
     font-family: ProductSansBold !important;
   }
 `
-const TopRightBar = styled.div`
-  position: absolute;
-  top: 5px;
-  right: 5px;
-`
-
-const TopRightBarInner = styled.div`
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  height: 40px;
-`
 
 const CoverPhoto = styled.div`
   flex: 1.2;
   animation: fadein 2s;
+  transition: flex 0.5s ease;
+  position: relative;
 
   @keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 1; }
   }
-  position: relative;
+
+  &:hover {
+    flex: 1.8;
+    transition: flex 0.5s ease;
+  }
 `
 
 const MainScreen = styled.div`
-  flex: 1.5;
+  transition: flex 0.5s ease;
+  flex: ${props => props.expand ? '0.8' : '0.4'};
   display: flex;
   background: white;
   padding: 10px 150px;
   align-items: center;
   justify-content: space-between;
   color: #545454;
-  flex: 1;
 `
 
 const GreetingMessage = styled.div`
@@ -134,6 +93,17 @@ const GreetingMessage = styled.div`
   text-align: left;
   gap: 23px;
   flex: 1;
+  margin-bottom: 30px;
+  transition: margin-bottom 0.5s ease;
+
+  &:hover {
+    margin-bottom: 0px;
+    transition: margin-bottom 0.5s ease;
+  }
+
+  &:hover svg {
+    opacity: 0.3;
+  }
 `
 
 const Greeting = styled.div`
@@ -182,23 +152,28 @@ const WeatherType = styled.div`
 `
 
 const FriendCards = styled.div`
-  flex: 0.5;
+  overflow: hidden;
+  flex: ${props => props.expand ? '0.5' : '0'};
+  padding: ${props => props.expand ? '25px 150px' : '0 150px'};
   background: #F4F4F4;
-  padding: 25px 150px;
   display: flex;
   gap: 30px;
+  transition: all 0.5s ease;
 `
 
 const ActionLinks = styled.div`
   font-family: ProductSansRegular;
+  display: flex;
+  gap: 10px;
 
-  a {
+  svg {
+    cursor: pointer;
+    opacity: 0;
     color: black;
-    opacity: 0.3;
     transition: opacity 0.5s ease;
   }
 
-  a:hover {
+  svg:hover {
     opacity: 0.7;
     transition: opacity 0.5s ease;
   }
@@ -212,24 +187,6 @@ const MiddleSection = styled.div`
   flex-direction: column;
   position: relative;
   flex: 1;
-`
-
-const Highlight = styled.div`
-  font-family: ProductSansRegular;
-  font-size: 18px;
-  color: #B3B3B3;
-  width: 100%;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`
-
-const Musing = styled.div`
-  font-family: ProductSansRegular;
-  font-size: 15px;
-  color: #B3B3B3;
-  margin-top: 8px;
 `
 
 const TopOverlay = styled.img`
@@ -268,7 +225,7 @@ const FocusInput = styled(Input)`
 
   input, input:active, input:focus {
     font-family: ProductSansRegular !important;
-    font-size: 15px;
+    font-size: 20px;
     border: none !important;
     text-align: center !important;
     background: rgba(0,0,0,0) !important;
@@ -327,6 +284,7 @@ const Main = ({
   const [onLoad, setOnLoad] = useState(false)
   const [highlight, setHighlight] = useState("")
   const [highlightExists, setHighlightExists] = useState(false)
+  const [expand, setExpand] = useState(false)
   const focusInputRef = useRef()
 
   const getFollowedUsers = async () => {
@@ -562,14 +520,26 @@ const Main = ({
           <BottomOverlay src={TopOverlayImage} />
           <CoverPhotoImage src='https://firebasestorage.googleapis.com/v0/b/family-gift-85cf0.appspot.com/o/wallpapers%2Fwallpaperflare.com_wallpaper.jpg?alt=media&token=81f5fc30-45ad-4891-a4d3-32a757bb99f7' width="100%" height="100%" />
         </CoverPhoto>
-        <MainScreen>
+        <MainScreen
+          expand={expand}
+        >
           <GreetingMessage className="greeting">
             <ActionLinks>
-              <a onClick={() => {
-                firebase.auth().signOut()
-                chrome.storage.local.clear()
-                setUser(null)
-              }}>Sign Out</a>
+              <FaTree size={25} onClick={() => {
+                if (expand) {
+                  setExpand(false)
+                } else {
+                  setExpand(true)
+                }
+              }} />
+              <FaSignOutAlt
+                onClick={() => {
+                  firebase.auth().signOut()
+                  chrome.storage.local.clear()
+                  setUser(null)
+                }}
+                size={25}
+              />
             </ActionLinks>
             <Greeting>
               Good Morning
@@ -604,7 +574,7 @@ const Main = ({
 
           </Weather>
         </MainScreen>
-        <FriendCards className="friendCards">
+        <FriendCards className="friendCards" expand={expand}>
           {followedUsers.map((user, i) => {
             return (
               <UserCard
