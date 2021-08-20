@@ -84,14 +84,16 @@ const UserCard = ({
       </Card>
       <Card className={weather ? "fade-in" : ""}>
         {weather ?
-          <CardWeather>
-            <div>{Math.round(weather.main.temp)}&deg;</div>
-            <WeatherIcon src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} width="50px" height="50px" />
-          </CardWeather>
+          <>
+            <CardWeather>
+              <div>{Math.round(weather.main.temp)}&deg;</div>
+              <WeatherIcon src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} width="50px" height="50px" />
+            </CardWeather>
+            <p style={{ fontSize: '15px' }}>
+              Today’s weather at <b>{user.location.split(",")[0]}</b> is <b>{weather.weather[0].description}</b>, hopefully Joe’s outside kicking a soccer ball.
+            </p>
+          </>
           : null}
-        <p style={{ fontSize: '15px' }}>
-          Today’s weather at <b>{user.location.split(",")[0]}</b> is fantabulous, hopefully Joe’s outside kicking a soccer ball.
-        </p>
       </Card>
       <Card className={highlight ? "fade-in" : ""}>
         <p>

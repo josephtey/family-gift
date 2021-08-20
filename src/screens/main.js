@@ -12,6 +12,8 @@ import UserCard from '../components/followedUserCard'
 import { BackgroundImage } from 'react-image-and-background-image-fade'
 import TopOverlayImage from '../assets/top-overlay.png'
 import { FaTree, FaSignOutAlt } from 'react-icons/fa'
+import ReactImageAppear from 'react-image-appear';
+
 
 const CoverPhotoImage = styled(BackgroundImage)`
   background-repeat: no-repeat center center fixed;
@@ -61,19 +63,26 @@ const Container = styled.div`
 
 const CoverPhoto = styled.div`
   flex: 1.2;
-  animation: fadein 2s;
   transition: flex 0.5s ease;
   position: relative;
-
-  @keyframes fadein {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
 
   &:hover {
     flex: 1.8;
     transition: flex 0.5s ease;
   }
+
+  // & > div > div {
+  //   background-color: #262626 !important;
+  // }
+
+  // & > div > div:before {
+  //   background-image: linear-gradient(
+  //     100deg,
+  //     rgba(255, 255, 255, 0),
+  //     rgba(255, 255, 255, 0) 50%,
+  //     rgba(255, 255, 255, 0) 80%
+  //   );
+  // }
 `
 
 const MainScreen = styled.div`
@@ -518,7 +527,12 @@ const Main = ({
             </Form>
           </TodayHighlight>
           <BottomOverlay src={TopOverlayImage} />
-          <CoverPhotoImage src='https://firebasestorage.googleapis.com/v0/b/family-gift-85cf0.appspot.com/o/wallpapers%2Fwallpaperflare.com_wallpaper.jpg?alt=media&token=81f5fc30-45ad-4891-a4d3-32a757bb99f7' width="100%" height="100%" />
+
+          <CoverPhotoImage
+            src='https://firebasestorage.googleapis.com/v0/b/family-gift-85cf0.appspot.com/o/wallpapers%2Fwallpaperflare.com_wallpaper.jpg?alt=media&token=81f5fc30-45ad-4891-a4d3-32a757bb99f7'
+            width="100%"
+            height="100%"
+          />
         </CoverPhoto>
         <MainScreen
           expand={expand}
@@ -556,20 +570,20 @@ const Main = ({
           </MiddleSection>
           <Weather className={weather ? "fade-in" : ""}>
             {weather ?
-              <Temperature>
-                <p>{Math.round(weather.main.temp)}&deg;</p>
-              </Temperature>
-              : null}
-            <WeatherDesc>
-              <WeatherLocation>
-                {user.location.split(",")[0]}
-              </WeatherLocation>
-              <WeatherType>
-                Partly Cloudy
-              </WeatherType>
-            </WeatherDesc>
-            {weather ?
-              <WeatherIcon src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} width="50px" height="50px" />
+              <>
+                <Temperature>
+                  <p>{Math.round(weather.main.temp)}&deg;</p>
+                </Temperature>
+                <WeatherDesc>
+                  <WeatherLocation>
+                    {user.location.split(",")[0]}
+                  </WeatherLocation>
+                  <WeatherType>
+                    {weather.weather[0].main}
+                  </WeatherType>
+                </WeatherDesc>
+                <WeatherIcon src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} width="50px" height="50px" />
+              </>
               : null}
 
           </Weather>

@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/static/css/main.811d9181.chunk.css",
-    "main.js": "/static/js/main.019ecfce.chunk.js",
-    "runtime-main.js": "/static/js/runtime-main.08373742.js",
+    "main.js": "/static/js/main.0e749c2e.chunk.js",
+    "runtime-main.js": "/static/js/runtime-main.2f10dbf8.js",
     "static/css/2.95c8ae7a.chunk.css": "/static/css/2.95c8ae7a.chunk.css",
-    "static/js/2.c0b4e836.chunk.js": "/static/js/2.c0b4e836.chunk.js",
-    "static/js/3.6c37d8b0.chunk.js": "/static/js/3.6c37d8b0.chunk.js",
+    "static/js/2.deed42a9.chunk.js": "/static/js/2.deed42a9.chunk.js",
+    "static/js/3.b5a95d64.chunk.js": "/static/js/3.b5a95d64.chunk.js",
     "index.html": "/index.html",
-    "static/js/2.c0b4e836.chunk.js.LICENSE.txt": "/static/js/2.c0b4e836.chunk.js.LICENSE.txt",
+    "static/js/2.deed42a9.chunk.js.LICENSE.txt": "/static/js/2.deed42a9.chunk.js.LICENSE.txt",
     "static/media/semantic.min.css": "/static/media/outline-icons.ddae9b1b.woff",
     "static/media/index.css": "/static/media/product-sans-regular.d1653840.ttf",
     "static/media/top-overlay.870bedca.png": "/static/media/top-overlay.870bedca.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.08373742.js",
+    "static/js/runtime-main.2f10dbf8.js",
     "static/css/2.95c8ae7a.chunk.css",
-    "static/js/2.c0b4e836.chunk.js",
+    "static/js/2.deed42a9.chunk.js",
     "static/css/main.811d9181.chunk.css",
-    "static/js/main.019ecfce.chunk.js"
+    "static/js/main.0e749c2e.chunk.js"
   ]
 }
