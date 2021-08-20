@@ -102,7 +102,7 @@ const GreetingMessage = styled.div`
   text-align: left;
   gap: 23px;
   flex: 1;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
   transition: margin-bottom 0.5s ease;
 
   &:hover {
@@ -161,13 +161,21 @@ const WeatherType = styled.div`
 `
 
 const FriendCards = styled.div`
+  display: flex;
+  gap: 30px;
+  height: 100%;
+`
+const FriendCardsWrapper = styled.div`
+  background: #F4F4F4;
   overflow: hidden;
   flex: ${props => props.expand ? '0.5' : '0'};
   padding: ${props => props.expand ? '25px 150px' : '0 150px'};
   background: #F4F4F4;
   display: flex;
-  gap: 30px;
+  flex-direction: column;
   transition: all 0.5s ease;
+  gap: 20px;
+  align-items: center;
 `
 
 const ActionLinks = styled.div`
@@ -278,6 +286,14 @@ const FocusSubText = styled.div`
   transition: opacity 1s ease;
   cursor: ${props => props.pointerCursor ? 'pointer' : 'normal'};
 `
+
+const FriendCardsTitle = styled.div`
+  font-family: ProductSansBold;
+  color: rgba(0,0,0,0.3);
+  font-size: 20px;
+`
+
+
 
 const Main = ({
   user,
@@ -484,7 +500,7 @@ const Main = ({
                 width: '50%'
               }}
               onSubmit={() => {
-                if (highlight.length != 0) {
+                if (highlight && highlight.length != 0) {
                   updateHighlight(highlight)
                   setHighlightExists(true)
                 } else {
@@ -492,7 +508,7 @@ const Main = ({
                 }
               }}
               onBlur={() => {
-                if (highlight.length != 0) {
+                if (highlight && highlight.length != 0) {
                   updateHighlight(highlight)
                   setHighlightExists(true)
                 } else {
@@ -588,17 +604,21 @@ const Main = ({
 
           </Weather>
         </MainScreen>
-        <FriendCards className="friendCards" expand={expand}>
-          {followedUsers.map((user, i) => {
-            return (
-              <UserCard
-                user={user}
-                index={i}
-              />
-            )
-          })}
+        <FriendCardsWrapper expand={expand}>
+          {/* <FriendCardsTitle>Meanwhile, in {user.location.split(",")[0]}</FriendCardsTitle> */}
 
-        </FriendCards>
+          <FriendCards className="friendCards" expand={expand}>
+            {followedUsers.map((user, i) => {
+              return (
+                <UserCard
+                  user={user}
+                  index={i}
+                />
+              )
+            })}
+
+          </FriendCards>
+        </FriendCardsWrapper>
         {/*
         {followedUsers.map((user, i) => {
           return (

@@ -29,13 +29,22 @@ const Card = styled.div`
 `
 
 const CardWeather = styled.div`
-  font-family: ProductSansBold;
-  font-size: 40px;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding-bottom: 10px;
+  gap: 20px;
+`
+
+const CardTemperature = styled.div`
+  font-family: ProductSansBold;
+  font-size: 40px;
+`
+
+const CardWeatherDesc = styled.div`
+  font-family: ProductSansBold;
+  font-size: 20px;
 `
 
 const WeatherIcon = styled.img`
@@ -78,7 +87,7 @@ const UserCard = ({
     <>
       <Card className={onLoad ? "fade-in" : ""}>
         <p>
-          It’s <b><Clock format={'h:mm A'} ticking={true} timezone={user.timezone} /></b> at <b>{user.location.split(",")[0]}</b>. <br />
+          In <b>{user.location.split(",")[0]}</b>, it's currently <b><Clock format={'h:mm A'} ticking={true} timezone={user.timezone} /></b>. <br />
           <b>{user.name}</b> is currently sleeping, dreaming about his future wife.
         </p>
       </Card>
@@ -86,7 +95,8 @@ const UserCard = ({
         {weather ?
           <>
             <CardWeather>
-              <div>{Math.round(weather.main.temp)}&deg;</div>
+              <CardTemperature>{Math.round(weather.main.temp)}&deg;</CardTemperature>
+              <CardWeatherDesc>{weather.weather[0].main}</CardWeatherDesc>
               <WeatherIcon src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} width="50px" height="50px" />
             </CardWeather>
             <p style={{ fontSize: '15px' }}>
