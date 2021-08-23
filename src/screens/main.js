@@ -11,9 +11,31 @@ import { useToasts } from 'react-toast-notifications';
 import UserCard from '../components/followedUserCard'
 import { BackgroundImage } from 'react-image-and-background-image-fade'
 import TopOverlayImage from '../assets/top-overlay.png'
-import { FaTree, FaSignOutAlt } from 'react-icons/fa'
+import { FaTree, FaSignOutAlt, FaLightbulb, FaAngleLeft } from 'react-icons/fa'
 import ReactImageAppear from 'react-image-appear';
 
+const Card = styled.div`
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: white;
+  font-family: ProductSansRegular;
+  font-size: 18px;
+  color: #545454;
+  padding: 30px;
+  box-shadow: 0 0 12px -2px rgba(0,0,0,0.05);
+  flex: 1;
+
+  b {
+    font-family: ProductSansBold;
+  }
+`
 
 const CoverPhotoImage = styled(BackgroundImage)`
   background-repeat: no-repeat center center fixed;
@@ -176,6 +198,10 @@ const FriendCardsWrapper = styled.div`
   transition: all 0.5s ease;
   gap: 20px;
   align-items: center;
+
+  &:hover > .meditation-icon {
+    opacity: ${props => props.cardState === 'normal' ? '0.3' : '0'};
+  }
 `
 
 const ActionLinks = styled.div`
@@ -237,6 +263,35 @@ const MainQuote = styled.div`
   z-index: 1000;
 `
 
+const CardInput = styled(Input)`
+  width: 60%;
+  margin-top: 10px;
+
+  input, input:active, input:focus {
+    font-family: ProductSansRegular !important;
+    font-size: 20px;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+    border-bottom: 1.5px solid rgba(0,0,0,0.15) !important;
+    text-align: center !important;
+    background: rgba(0,0,0,0) !important;
+    color: rgba(0,0,0,0.3) !important;
+    border-radius: 0 !important;
+    padding: 2px !important;
+  }
+  input::selection {
+    background: black;
+    color: white;
+    border-bottom: 1px solid white;
+  }
+
+  input::placeholder {
+    color: rgba(255, 255, 255, 0.3) !important;
+    opacity: 1;
+  }
+`
+
 const FocusInput = styled(Input)`
   width: 30%;
 
@@ -293,6 +348,30 @@ const FriendCardsTitle = styled.div`
   font-size: 20px;
 `
 
+const MeditationIcon = styled(FaLightbulb)`
+  position: absolute;
+  left: 110px;
+  opacity: 0;
+  transition: all 1s ease;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.5 !important;
+  }
+`
+
+const BackButton = styled(FaAngleLeft)`
+  opacity: 0.3;
+  transition: all 1s ease;  
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.5;
+  }
+`
 
 
 const Main = ({
@@ -310,6 +389,8 @@ const Main = ({
   const [highlight, setHighlight] = useState("")
   const [highlightExists, setHighlightExists] = useState(false)
   const [expand, setExpand] = useState(false)
+  const [cardState, setCardState] = useState('normal')
+
   const focusInputRef = useRef()
 
   const getFollowedUsers = async () => {
@@ -604,39 +685,34 @@ const Main = ({
 
           </Weather>
         </MainScreen>
-        <FriendCardsWrapper expand={expand}>
-          {/* <FriendCardsTitle>Meanwhile, in {user.location.split(",")[0]}</FriendCardsTitle> */}
+        <FriendCardsWrapper expand={expand} cardState={cardState}>
+          <MeditationIcon size={25} className="meditation-icon" onClick={() => {
+            setCardState('musing')
+          }} />
+          {cardState === 'normal' ?
+            <FriendCards className="friendCards" expand={expand}>
+              {followedUsers.map((user, i) => {
+                return (
+                  <UserCard
+                    user={user}
+                    index={i}
+                  />
+                )
+              })}
 
-          <FriendCards className="friendCards" expand={expand}>
-            {followedUsers.map((user, i) => {
-              return (
-                <UserCard
-                  user={user}
-                  index={i}
-                />
-              )
-            })}
-
-          </FriendCards>
+            </FriendCards>
+            : cardState === 'musing' ?
+              <>
+                <Card>
+                  <BackButton size={25} onClick={() => {
+                    setCardState('normal')
+                  }} />
+                  What's something you'd like to gently remind Joseph about?
+                  <CardInput />
+                </Card>
+              </>
+              : null}
         </FriendCardsWrapper>
-        {/*
-        {followedUsers.map((user, i) => {
-          return (
-            <UserCard
-              user={user}
-              index={i}
-            />
-          )
-        })}
-
-        
-
-         <br />
-        <Clock format={'h:mm A'} ticking={true} timezone={user.timezone} style={{
-          fontSize: '60px'
-        }} />
-        <Header>Good Morning, {user.name}</Header>
-        <Segment>{user.location} | {user.timezone} | {weather ? <>{weather.main.temp}&deg;C</> : null}</Segment> */}
       </Container>
     )
   } else {
