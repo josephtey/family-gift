@@ -8,7 +8,6 @@ const Card = styled.div`
   opacity: 0;
   transition: opacity 2s ease;
   height: 100%;
-  width: 33%;
   display: flex;
   flex-direction: column;
   border-radius: 6px;
@@ -105,12 +104,14 @@ const UserCard = ({
           </>
           : null}
       </Card>
-      <Card className={highlight ? "fade-in" : ""}>
-        <p>
-          <b>{user.name}'s</b> main focus today is: <br />
-          {highlight}
-        </p>
-      </Card>
+      {highlight ?
+        <Card className={highlight ? "fade-in" : ""}>
+          <p>
+            <b>{user.name}'s</b> main focus today is: <br />
+            {highlight}
+          </p>
+        </Card>
+        : null}
     </>
   )
 }

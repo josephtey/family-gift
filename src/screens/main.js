@@ -186,6 +186,7 @@ const FriendCards = styled.div`
   display: flex;
   gap: 30px;
   height: 100%;
+  width: 100%;
 `
 const FriendCardsWrapper = styled.div`
   background: #F4F4F4;
@@ -381,6 +382,9 @@ const Main = ({
   const { addToast } = useToasts();
 
   const [weather, setWeather] = useState(null)
+  const [quote, setQuote] = useState("")
+  const [addQuoteOpen, setAddQuoteOpen] = useState(false)
+  const [addQuoteText, setAddQuoteText] = useState("")
   const [followEmail, setFollowEmail] = useState('')
   const [open, setOpen] = useState(false)
   const [followedUsers, setFollowedUsers] = useState([])
@@ -454,6 +458,57 @@ const Main = ({
 
   }
 
+  const addQuote = (quote) => {
+    firebase.firestore().collection("quotes").add({
+      quote,
+      date: ""
+    })
+      .then(() => {
+        addToast('Quote added!', { appearance: 'success' });
+      })
+      .catch((error) => {
+
+        addToast(error.message, { appearance: 'error' });
+      });
+  }
+
+  const fetchRandomQuote = () => {
+
+    firebase.firestore().collection("quotes").where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: user.timezone })).get()
+      .then(snapshot => {
+        if (snapshot.size > 0) {
+          snapshot.forEach(doc => {
+            setQuote(doc.data().quote)
+          })
+        } else {
+          firebase.firestore().collection("quotes").where("date", "==", "").get()
+            .then(snapshot => {
+              if (snapshot.size > 0) {
+                snapshot.forEach(doc => {
+                  setQuote(doc.data().quote)
+
+                  const docRef = firebase.firestore().collection("quotes").doc(doc.id)
+                  firebase.firestore().runTransaction((transaction) => {
+                    return transaction.get(docRef).then((doc) => {
+                      if (!doc.exists) {
+                        addToast('Error, quote does not exist', { appearance: 'error' })
+                      }
+
+                      transaction.update(docRef, { date: new Date().toLocaleDateString("en-AU", { timeZone: user.timezone }) })
+                    })
+
+                  });
+                })
+              }
+            })
+            .catch(error => {
+              addToast(error.message, { appearance: 'error' });
+            });
+        }
+      })
+
+
+  }
   useEffect(() => {
 
     const getWeather = async () => {
@@ -489,6 +544,7 @@ const Main = ({
         });
     }
 
+    fetchRandomQuote()
     getWeather()
     getFollowedUsers()
     fetchHighlight()
@@ -548,6 +604,29 @@ const Main = ({
           </Button>
           </Modal.Actions>
         </Modal>
+
+        <Modal
+          onClose={() => setAddQuoteOpen(false)}
+          onOpen={() => setAddQuoteOpen(true)}
+          open={addQuoteOpen}
+        >
+          <Modal.Header>Add Quote</Modal.Header>
+          <Modal.Content>
+            <Input placeholder="What quote do you want to add?" onChange={(e) => {
+              setAddQuoteText(e.target.value)
+            }} />
+          </Modal.Content>
+          <Modal.Actions>
+            <Button
+              onClick={async () => {
+                addQuote(addQuoteText)
+                setAddQuoteOpen(false)
+              }}
+            >
+              Add Quote
+          </Button>
+          </Modal.Actions>
+        </Modal>
         {/* <TopRightBar>
           <TopRightBarInner>
             <div>{user.email}</div>
@@ -572,8 +651,12 @@ const Main = ({
 
         <CoverPhoto className="coverPhoto">
           <TopOverlay src={TopOverlayImage} />
-          <MainQuote>
-            Sometimes, less is more.
+          <MainQuote
+            onClick={() => {
+              setAddQuoteOpen(true)
+            }}
+          >
+            {quote}
           </MainQuote>
           <TodayHighlight>
             <Form
