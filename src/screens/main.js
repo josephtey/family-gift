@@ -80,6 +80,7 @@ const Container = styled.div`
   .ui.disabled.input, .ui.form .disabled.field, .ui.form .disabled.fields .field, .ui.form .field :disabled {
     opacity: 1 !important;
     font-family: ProductSansBold !important;
+    border: none !important;
   }
 `
 
@@ -264,6 +265,19 @@ const MainQuote = styled.div`
   z-index: 1000;
 `
 
+const ReminderPopup = styled.div`
+  color: white;
+  font-family: ProductSansRegular;
+  font-size: 15px;
+  position: absolute;
+  background: rgba(0,0,0,0.4);
+  border-radius: 0;
+  padding: 15px;
+  right: 15px;
+  bottom: 15px;
+  z-index: 1000;
+`
+
 const CardInput = styled(Input)`
   width: 60%;
   margin-top: 10px;
@@ -394,6 +408,8 @@ const Main = ({
   const [highlightExists, setHighlightExists] = useState(false)
   const [expand, setExpand] = useState(false)
   const [cardState, setCardState] = useState('normal')
+  const [reminderExists, setReminderExists] = useState(false)
+  const [reminder, setReminder] = useState("")
 
   const focusInputRef = useRef()
 
@@ -472,6 +488,46 @@ const Main = ({
       });
   }
 
+  const updateReminder = async (newReminder) => {
+    let todayReminderID = null
+    const reminders = await firebase.firestore().collection("reminders").where("user", "==", user.email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: user.timezone })).get()
+    reminders.forEach(doc => todayReminderID = doc.id)
+
+    if (todayReminderID) {
+      const docRef = firebase.firestore().collection("reminders").doc(todayReminderID)
+      firebase.firestore().runTransaction((transaction) => {
+        return transaction.get(docRef).then((doc) => {
+          if (!doc.exists) {
+            addToast('Error, reminder does not exist', { appearance: 'error' })
+          }
+
+          transaction.update(docRef, { reminder: newReminder })
+        })
+      }).then(() => {
+        console.log("Transaction successfully committed!");
+      }).catch((error) => {
+        addToast(error.message, { appearance: 'error' })
+      });
+    } else {
+      firebase.firestore().collection("reminders").add({
+        user: user.email,
+        date: new Date().toLocaleDateString("en-AU", { timeZone: user.timezone }),
+        reminder: newReminder
+      })
+    }
+  }
+  const fetchReminder = () => {
+    firebase.firestore().collection("reminders").where("user", "==", user.email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: user.timezone })).get()
+      .then(snapshot => {
+        if (snapshot.size > 0) {
+          snapshot.forEach(doc => {
+            setReminder(doc.data().reminder)
+            setReminderExists(true)
+          })
+        }
+      })
+  }
+
   const fetchRandomQuote = () => {
 
     firebase.firestore().collection("quotes").where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: user.timezone })).get()
@@ -548,6 +604,7 @@ const Main = ({
     getWeather()
     getFollowedUsers()
     fetchHighlight()
+    fetchReminder()
 
     setTimeout(() => {
       setOnLoad(true)
@@ -651,6 +708,9 @@ const Main = ({
 
         <CoverPhoto className="coverPhoto">
           <TopOverlay src={TopOverlayImage} />
+          <ReminderPopup>
+            Remember to be hygienic!
+          </ReminderPopup>
           <MainQuote
             onClick={() => {
               setAddQuoteOpen(true)
@@ -790,8 +850,26 @@ const Main = ({
                   <BackButton size={25} onClick={() => {
                     setCardState('normal')
                   }} />
-                  What's something you'd like to gently remind Joseph about?
-                  <CardInput />
+
+                  <Form
+                    onSubmit={() => {
+                      updateReminder(reminder)
+                      setReminderExists(true)
+                    }}
+                    style={{ fontSize: '20px' }}
+                  >
+                    <Form.Field>
+                      What's something you'd like to gently remind Joseph about?
+                      <CardInput
+                        disabled={reminderExists}
+                        value={reminder}
+                        onChange={(e) => {
+                          setReminder(e.target.value)
+                        }}
+                        className={`${reminderExists ? "animate-in" : ""}`}
+                      />
+                    </Form.Field>
+                  </Form>
                 </Card>
               </>
               : null}

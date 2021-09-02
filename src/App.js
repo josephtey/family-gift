@@ -33,7 +33,7 @@ const App = () => {
       })
     } catch (err) {
       setUser({
-        email: 'joetey@stanford.edu',
+        email: 'jjttey@gmail.com',
         name: 'Joseph Tey',
         timezone: 'America/Los_Angeles',
         location: 'San Francisco,US'
