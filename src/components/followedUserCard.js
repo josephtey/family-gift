@@ -17,7 +17,7 @@ const Card = styled.div`
   text-align: center;
   background: white;
   font-family: ProductSansRegular;
-  font-size: 18px;
+  font-size: 14px;
   color: #545454;
   padding: 30px;
   box-shadow: 0 0 12px -2px rgba(0,0,0,0.05);
@@ -39,7 +39,7 @@ const CardWeather = styled.div`
 
 const CardTemperature = styled.div`
   font-family: ProductSansBold;
-  font-size: 40px;
+  font-size: 30px;
 `
 
 const CardWeatherDesc = styled.div`
@@ -52,25 +52,25 @@ const WeatherIcon = styled.img`
 `
 
 const actionStates = {
-  0: ["Breakfast"],
-  1: ["Classes"],
-  2: ["Lunch"],
-  3: ["Activities"],
-  4: ["Dinner"],
-  5: ["Chill after dinner", "Party", "Have fun", "Listen to tunes"],
-  6: ["In dorm, winding down"],
-  7: ["Sleep!"]
+  0: ["eating 2 eggs on a piece of bread."],
+  1: ["taking classes.", "learning about the meaning of life!"],
+  2: ["eating yummy Mexican food!"],
+  3: ["playing card games with his roommate."],
+  4: ["eating Japanese for dinner."],
+  5: ["chilling with his friends.", "at a party...", "having the best time of his life.", "listening to music in his room."],
+  6: ["in his dorm, having a deep & meaningful convo with his roommate."],
+  7: ["sleeping zzzz"]
 }
 
 const weatherStates = {
-  0: ["Thunder"],
-  1: ["Drizzle"],
-  2: ["Rain"],
-  3: ["Snow"],
-  4: ["Weird"],
-  5: ["Clear"],
-  6: ["Some clouds"],
-  7: ["Very cloudy"]
+  0: ["staying inside his dorm to avoid the thunder strikes!"],
+  1: ["listening to the rain drops and thinking about life back home :)"],
+  2: ["enjoying each drop of rain that hits the floor."],
+  3: ["in awe of the snow."],
+  4: ["weirded out by this strange, uncanny weather."],
+  5: ["outside with his friends, kicking a football or something.", "outside going fountain hopping with his friends!"],
+  6: ["going on a walk with a new friend, hearing their story."],
+  7: ["sad that he can't see the sun because of how cloudy it is :("]
 }
 
 const getWeatherStatesFromCode = (weatherCode) => {
@@ -183,8 +183,7 @@ const UserCard = ({
 
             setRandNumState(getRandNumState(actionState, actionStates[actionState].length))
             setActionState(actionState)
-          }} format={'h:mm A'} ticking={true} timezone={user.timezone} /></b>. <br />
-          <b>{user.name}</b> is currently {actionState ? actionStates[actionState][randNumState] : null}
+          }} format={'h:mm A'} ticking={true} timezone={user.timezone} /></b>. {user.name !== 'Mum & Dad' ? <><b>{user.name}</b> is currently {actionState ? actionStates[actionState][randNumState] : null}</> : null}
         </p>
       </Card>
       <Card className={weather ? "fade-in" : ""}>
@@ -195,8 +194,8 @@ const UserCard = ({
               <CardWeatherDesc>{weather.weather[0].main}</CardWeatherDesc>
               <WeatherIcon src={`http://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} width="50px" height="50px" />
             </CardWeather>
-            <p style={{ fontSize: '15px' }}>
-              Today’s weather at <b>{user.location.split(",")[0]}</b> is <b>{weather.weather[0].description}</b>, {weatherState ? weatherStates[weatherState][randNumWeather] : null}
+            <p style={{ fontSize: '12px' }}>
+              Today’s weather at <b>{user.location.split(",")[0]}</b> is <b>{weather.weather[0].description}</b>. {user.name !== 'Mum & Dad' ? <><b>{user.name}</b> is probably {weatherState ? weatherStates[weatherState][randNumWeather] : null}</> : null}
             </p>
           </>
           : null}

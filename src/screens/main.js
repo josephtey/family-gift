@@ -11,7 +11,7 @@ import { useToasts } from 'react-toast-notifications';
 import UserCard from '../components/followedUserCard'
 import { BackgroundImage } from 'react-image-and-background-image-fade'
 import TopOverlayImage from '../assets/top-overlay.png'
-import { FaTree, FaSignOutAlt, FaLightbulb, FaAngleLeft } from 'react-icons/fa'
+import { FaTree, FaSignOutAlt, FaKissWinkHeart, FaAngleLeft, FaLightbulb } from 'react-icons/fa'
 import ReactImageAppear from 'react-image-appear';
 
 const Card = styled.div`
@@ -201,7 +201,7 @@ const FriendCardsWrapper = styled.div`
   gap: 20px;
   align-items: center;
 
-  &:hover > .meditation-icon {
+  &:hover > .reminder-icon, &:hover > .musing-icon {
     opacity: ${props => props.cardState === 'normal' ? '0.3' : '0'};
   }
 `
@@ -268,14 +268,31 @@ const MainQuote = styled.div`
 const ReminderPopup = styled.div`
   color: white;
   font-family: ProductSansRegular;
-  font-size: 15px;
+  font-size: 12px;
+  text-align: center;
   position: absolute;
   background: rgba(0,0,0,0.4);
-  border-radius: 0;
-  padding: 15px;
+  border-radius: 15px;
+  padding: 12px;
   right: 15px;
-  bottom: 15px;
+  top: 15px;
   z-index: 1000;
+  width: 200px;
+`
+
+const MusingPopup = styled.div`
+  color: white;
+  font-family: ProductSansRegular;
+  font-size: 12px;
+  text-align: center;
+  position: absolute;
+  background: rgba(0,0,0,0.4);
+  border-radius: 15px;
+  padding: 12px;
+  left: 15px;
+  top: 15px;
+  z-index: 1000;
+  width: 200px;
 `
 
 const CardInput = styled(Input)`
@@ -363,9 +380,21 @@ const FriendCardsTitle = styled.div`
   font-size: 20px;
 `
 
-const MeditationIcon = styled(FaLightbulb)`
+const ReminderIcon = styled(FaKissWinkHeart)`
   position: absolute;
   left: 110px;
+  opacity: 0;
+  transition: all 1s ease;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.5 !important;
+  }
+`
+
+const MusingIcon = styled(FaLightbulb)`
+  position: absolute;
+  right: 110px;
   opacity: 0;
   transition: all 1s ease;
   cursor: pointer;
@@ -410,8 +439,84 @@ const Main = ({
   const [cardState, setCardState] = useState('normal')
   const [reminderExists, setReminderExists] = useState(false)
   const [reminder, setReminder] = useState("")
+  const [musing, setMusing] = useState("")
+  const [musingExists, setMusingExists] = useState(false)
+  const [followedMusing, setFollowedMusing] = useState()
+  const [followedReminder, setFollowedReminder] = useState()
 
   const focusInputRef = useRef()
+
+  const getMusingAndReminder = async (followedUsers) => {
+    if (followedUsers.length > 1) {
+      if (followedUsers[0].name === 'Dad') {
+        firebase.firestore().collection("musings").where("user", "==", followedUsers[0].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[0].timezone })).get()
+          .then(querySnapshot => {
+            if (querySnapshot.docs.length > 0) {
+              querySnapshot.forEach((doc) => {
+                setFollowedMusing(['Dad', doc.data().musing])
+              })
+            }
+          }
+          )
+      }
+
+      if (followedUsers[0].name === 'Mum') {
+        firebase.firestore().collection("reminders").where("user", "==", followedUsers[0].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[0].timezone })).get()
+          .then(querySnapshot => {
+            if (querySnapshot.docs.length > 0) {
+              querySnapshot.forEach((doc) => {
+                setFollowedReminder(['Mum', doc.data().reminder])
+              })
+            }
+          }
+          )
+      }
+      if (followedUsers[1].name === 'Dad') {
+        firebase.firestore().collection("musings").where("user", "==", followedUsers[1].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[1].timezone })).get()
+          .then(querySnapshot => {
+            if (querySnapshot.docs.length > 0) {
+              querySnapshot.forEach((doc) => {
+                setFollowedMusing(['Dad', doc.data().musing])
+              })
+            }
+          }
+          )
+      }
+
+      if (followedUsers[1].name === 'Mum') {
+        firebase.firestore().collection("reminders").where("user", "==", followedUsers[1].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[1].timezone })).get()
+          .then(querySnapshot => {
+            if (querySnapshot.docs.length > 0) {
+              querySnapshot.forEach((doc) => {
+                setFollowedReminder(['Mum', doc.data().reminder])
+              })
+            }
+          }
+          )
+      }
+    } else {
+      firebase.firestore().collection("musings").where("user", "==", followedUsers[0].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[0].timezone })).get()
+        .then(querySnapshot => {
+          if (querySnapshot.docs.length > 0) {
+            querySnapshot.forEach((doc) => {
+              setFollowedMusing([followedUsers[0].name, doc.data().musing])
+            })
+          }
+        }
+        )
+
+      firebase.firestore().collection("reminders").where("user", "==", followedUsers[0].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[0].timezone })).get()
+        .then(querySnapshot => {
+          if (querySnapshot.docs.length > 0) {
+            querySnapshot.forEach((doc) => {
+              setFollowedReminder([followedUsers[0].name, doc.data().reminder])
+            })
+          }
+        }
+        )
+    }
+
+  }
 
   const getFollowedUsers = async () => {
     const tempFriends = []
@@ -426,7 +531,20 @@ const Main = ({
       friendInfo.forEach(doc => tempFriendInfo.push(doc.data()))
     }
 
-    setFollowedUsers(tempFriendInfo)
+    getMusingAndReminder(tempFriendInfo)
+
+    const newTempFriendInfo = tempFriendInfo.map(friend => {
+      if (friend.name === 'Dad' || friend.name === 'Mum') {
+        return {
+          ...friend,
+          name: 'Mum & Dad'
+        }
+      } else {
+        return friend
+      }
+    })
+
+    setFollowedUsers(newTempFriendInfo)
   }
 
   const fetchHighlight = async () => {
@@ -488,6 +606,35 @@ const Main = ({
       });
   }
 
+  const updateMusing = async (newMusing) => {
+    let todayMusingID = null
+    const musings = await firebase.firestore().collection("musings").where("user", "==", user.email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: user.timezone })).get()
+    musings.forEach(doc => todayMusingID = doc.id)
+
+    if (todayMusingID) {
+      const docRef = firebase.firestore().collection("musings").doc(todayMusingID)
+      firebase.firestore().runTransaction((transaction) => {
+        return transaction.get(docRef).then((doc) => {
+          if (!doc.exists) {
+            addToast('Error, reminder does not exist', { appearance: 'error' })
+          }
+
+          transaction.update(docRef, { musing: newMusing })
+        })
+      }).then(() => {
+        console.log("Transaction successfully committed!");
+      }).catch((error) => {
+        addToast(error.message, { appearance: 'error' })
+      });
+    } else {
+      firebase.firestore().collection("musings").add({
+        user: user.email,
+        date: new Date().toLocaleDateString("en-AU", { timeZone: user.timezone }),
+        musing: newMusing
+      })
+    }
+  }
+
   const updateReminder = async (newReminder) => {
     let todayReminderID = null
     const reminders = await firebase.firestore().collection("reminders").where("user", "==", user.email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: user.timezone })).get()
@@ -523,6 +670,18 @@ const Main = ({
           snapshot.forEach(doc => {
             setReminder(doc.data().reminder)
             setReminderExists(true)
+          })
+        }
+      })
+  }
+
+  const fetchMusing = () => {
+    firebase.firestore().collection("musings").where("user", "==", user.email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: user.timezone })).get()
+      .then(snapshot => {
+        if (snapshot.size > 0) {
+          snapshot.forEach(doc => {
+            setMusing(doc.data().musing)
+            setMusingExists(true)
           })
         }
       })
@@ -605,6 +764,7 @@ const Main = ({
     getFollowedUsers()
     fetchHighlight()
     fetchReminder()
+    fetchMusing()
 
     setTimeout(() => {
       setOnLoad(true)
@@ -708,9 +868,20 @@ const Main = ({
 
         <CoverPhoto className="coverPhoto">
           <TopOverlay src={TopOverlayImage} />
-          <ReminderPopup>
-            Remember to be hygienic!
-          </ReminderPopup>
+
+          {followedReminder ?
+            <ReminderPopup className={followedReminder ? "fade-in" : null}>
+              A reminder from <b>{followedReminder[0]}</b> <br />
+              {followedReminder[1]}
+            </ReminderPopup>
+            : null}
+
+          {followedMusing ?
+            <MusingPopup className={followedMusing ? "fade-in" : null}>
+              A musing from <b>{followedMusing[0]}</b> <br />
+              {followedMusing[1]}
+            </MusingPopup>
+            : null}
           <MainQuote
             onClick={() => {
               setAddQuoteOpen(true)
@@ -829,22 +1000,29 @@ const Main = ({
           </Weather>
         </MainScreen>
         <FriendCardsWrapper expand={expand} cardState={cardState}>
-          <MeditationIcon size={25} className="meditation-icon" onClick={() => {
-            setCardState('musing')
-          }} />
+          {followedUsers.length > 0 && user.name != 'Dad' ?
+            <ReminderIcon size={25} className="reminder-icon" onClick={() => {
+              setCardState('reminder')
+            }} />
+            : null}
+
+          {followedUsers.length > 0 && user.name != 'Mum' ?
+            <MusingIcon size={25} className="musing-icon" onClick={() => {
+              setCardState('musing')
+            }} />
+            : null}
+
           {cardState === 'normal' ?
             <FriendCards className="friendCards" expand={expand}>
-              {followedUsers.map((user, i) => {
-                return (
-                  <UserCard
-                    user={user}
-                    index={i}
-                  />
-                )
-              })}
+
+              {followedUsers.length > 0 ?
+                <UserCard
+                  user={followedUsers[0]}
+                />
+                : null}
 
             </FriendCards>
-            : cardState === 'musing' ?
+            : cardState === 'reminder' ?
               <>
                 <Card>
                   <BackButton size={25} onClick={() => {
@@ -859,7 +1037,7 @@ const Main = ({
                     style={{ fontSize: '20px' }}
                   >
                     <Form.Field>
-                      What's something you'd like to gently remind Joseph about?
+                      What's something you'd like to gently remind {followedUsers[0].name} about?
                       <CardInput
                         disabled={reminderExists}
                         value={reminder}
@@ -872,7 +1050,34 @@ const Main = ({
                   </Form>
                 </Card>
               </>
-              : null}
+              : cardState === 'musing' ?
+                <Card>
+                  <BackButton size={25} onClick={() => {
+                    setCardState('normal')
+                  }} />
+
+                  <Form
+                    onSubmit={() => {
+                      updateMusing(musing)
+                      setMusingExists(true)
+                    }}
+                    style={{ fontSize: '20px' }}
+                  >
+                    <Form.Field>
+                      What's something you've realised recently and want to share with {followedUsers[0].name}?
+                  <CardInput
+                        disabled={musingExists}
+                        value={musing}
+                        onChange={(e) => {
+                          setMusing(e.target.value)
+                        }}
+                        className={`${musingExists ? "animate-in" : ""}`}
+                      />
+                    </Form.Field>
+                  </Form>
+                </Card>
+                : null
+          }
         </FriendCardsWrapper>
       </Container>
     )
