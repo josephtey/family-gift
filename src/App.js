@@ -28,7 +28,10 @@ const App = () => {
     try {
       chrome.storage.sync.get("user", data => {
         if (data.user) {
+          console.log(data.user)
           setUser(data.user)
+        } else {
+          setLoading(false)
         }
       })
     } catch (err) {

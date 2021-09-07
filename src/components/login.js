@@ -83,13 +83,13 @@ const Login = ({
       >Login</Button>
 
       <br />
-      <a
+      {/* <a
         onClick={() => {
           gotoCreateAccountScreen()
         }}
       >
         Create Account
-      </a>
+      </a> */}
     </FormContainer>
   );
 }

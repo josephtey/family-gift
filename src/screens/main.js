@@ -960,7 +960,7 @@ const Main = ({
               <FaSignOutAlt
                 onClick={() => {
                   firebase.auth().signOut()
-                  chrome.storage.local.clear()
+                  chrome.storage.sync.clear()
                   setUser(null)
                 }}
                 size={25}
