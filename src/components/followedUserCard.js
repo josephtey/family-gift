@@ -17,7 +17,7 @@ const Card = styled.div`
   text-align: center;
   background: white;
   font-family: ProductSansRegular;
-  font-size: 14px;
+  font-size: 16px;
   color: #545454;
   padding: 30px;
   box-shadow: 0 0 12px -2px rgba(0,0,0,0.05);

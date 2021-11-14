@@ -271,13 +271,13 @@ const ReminderPopup = styled.div`
   font-size: 12px;
   text-align: center;
   position: absolute;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.2);
   border-radius: 15px;
   padding: 12px;
   right: 15px;
   top: 15px;
   z-index: 1000;
-  width: 200px;
+  width: 20%;
 `
 
 const MusingPopup = styled.div`
@@ -286,13 +286,13 @@ const MusingPopup = styled.div`
   font-size: 12px;
   text-align: center;
   position: absolute;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.2);
   border-radius: 15px;
   padding: 12px;
   left: 15px;
   top: 15px;
   z-index: 1000;
-  width: 200px;
+  width: 20%;
 `
 
 const CardInput = styled(Input)`
@@ -443,12 +443,47 @@ const Main = ({
   const [musingExists, setMusingExists] = useState(false)
   const [followedMusing, setFollowedMusing] = useState()
   const [followedReminder, setFollowedReminder] = useState()
+  const [allMusings, setAllMusings] = useState([])
+  const [allReminders, setAllReminders] = useState([])
+  const [allRemindersOpen, setAllRemindersModalOpen] = useState(false)
+  const [allMusingsOpen, setAllMusingsModalOpen] = useState(false)
 
   const focusInputRef = useRef()
+  const cardInputRef = useRef()
+
+  const getAllMusings = async (user) => {
+
+    let musings = []
+    const querySnapshot = await firebase.firestore().collection("musings").where("user", "==", user.email).get()
+    if (querySnapshot.docs.length > 0) {
+      querySnapshot.forEach((doc) => {
+        musings.push(doc.data());
+      })
+    }
+
+    setAllMusings(musings)
+  }
+
+
+  const getAllReminders = async (user) => {
+
+    let reminders = []
+    const querySnapshot = await firebase.firestore().collection("reminders").where("user", "==", user.email).get()
+    if (querySnapshot.docs.length > 0) {
+      querySnapshot.forEach((doc) => {
+        reminders.push(doc.data());
+      })
+    }
+
+    setAllReminders(reminders)
+  }
 
   const getMusingAndReminder = async (followedUsers) => {
+
+    // for child
     if (followedUsers.length > 1) {
       if (followedUsers[0].name === 'Dad') {
+        getAllMusings(followedUsers[0]);
         firebase.firestore().collection("musings").where("user", "==", followedUsers[0].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[0].timezone })).get()
           .then(querySnapshot => {
             if (querySnapshot.docs.length > 0) {
@@ -461,6 +496,7 @@ const Main = ({
       }
 
       if (followedUsers[0].name === 'Mum') {
+        getAllReminders(followedUsers[0])
         firebase.firestore().collection("reminders").where("user", "==", followedUsers[0].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[0].timezone })).get()
           .then(querySnapshot => {
             if (querySnapshot.docs.length > 0) {
@@ -472,6 +508,7 @@ const Main = ({
           )
       }
       if (followedUsers[1].name === 'Dad') {
+        getAllMusings(followedUsers[1]);
         firebase.firestore().collection("musings").where("user", "==", followedUsers[1].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[1].timezone })).get()
           .then(querySnapshot => {
             if (querySnapshot.docs.length > 0) {
@@ -484,6 +521,7 @@ const Main = ({
       }
 
       if (followedUsers[1].name === 'Mum') {
+        getAllReminders(followedUsers[1])
         firebase.firestore().collection("reminders").where("user", "==", followedUsers[1].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[1].timezone })).get()
           .then(querySnapshot => {
             if (querySnapshot.docs.length > 0) {
@@ -494,7 +532,10 @@ const Main = ({
           }
           )
       }
+
+      // for parents
     } else {
+      getAllMusings(followedUsers[0]);
       firebase.firestore().collection("musings").where("user", "==", followedUsers[0].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[0].timezone })).get()
         .then(querySnapshot => {
           if (querySnapshot.docs.length > 0) {
@@ -505,6 +546,7 @@ const Main = ({
         }
         )
 
+      getAllReminders(followedUsers[0])
       firebase.firestore().collection("reminders").where("user", "==", followedUsers[0].email).where("date", "==", new Date().toLocaleDateString("en-AU", { timeZone: followedUsers[0].timezone })).get()
         .then(querySnapshot => {
           if (querySnapshot.docs.length > 0) {
@@ -775,6 +817,36 @@ const Main = ({
     return (
       <Container>
         <Modal
+          onClose={() => setAllRemindersModalOpen(false)}
+          onOpen={() => setAllRemindersModalOpen(true)}
+          open={allRemindersOpen}
+        >
+          <Modal.Header>All Reminders</Modal.Header>
+          <Modal.Content>
+            <div style={{ height: '300px', overflow: 'auto' }}>
+              {allReminders.length > 0 && allReminders.map((reminder) => {
+                return (
+                  <div>
+                    <b>{reminder.date}</b> <br />
+                    {reminder.reminder} <br /> <br />
+                  </div>
+                )
+              })}
+            </div>
+          </Modal.Content>
+          <Modal.Actions>
+            {/* <Button
+              onClick={async () => {
+                addQuote(addQuoteText)
+                setAddQuoteOpen(false)
+              }}
+            >
+              Add Quote
+          </Button> */}
+          </Modal.Actions>
+        </Modal>
+
+        <Modal
           onClose={() => setOpen(false)}
           onOpen={() => setOpen(true)}
           open={open}
@@ -866,22 +938,28 @@ const Main = ({
         </TopRightBar> */}
 
 
-        <CoverPhoto className="coverPhoto">
+        <CoverPhoto className="coverPhoto" onClick={() => {
+          setAllRemindersModalOpen(true);
+        }}>
           <TopOverlay src={TopOverlayImage} />
 
           {followedReminder ?
             <ReminderPopup className={followedReminder ? "fade-in" : null}>
-              A reminder from <b>{followedReminder[0]}</b> <br />
-              {followedReminder[1]}
+              <span style={{ fontSize: '15px', 'margin-bottom': '10px' }}>A reminder from <b>{followedReminder[0]}</b></span> <br />
+              <span style={{ fontSize: '10px', lineHeight: '7px', opacity: '0.8' }}>{followedReminder[1]}</span>
             </ReminderPopup>
             : null}
 
           {followedMusing ?
             <MusingPopup className={followedMusing ? "fade-in" : null}>
-              A musing from <b>{followedMusing[0]}</b> <br />
-              {followedMusing[1]}
+              <span style={{ fontSize: '15px', 'margin-bottom': '10px' }}>A musing from <b>{followedMusing[0]}</b></span> <br />
+              <span style={{ fontSize: '11px', lineHeight: '7px', opacity: '0.8' }}>{followedMusing[1]}</span>
             </MusingPopup>
             : null}
+
+
+
+
           <MainQuote
             onClick={() => {
               setAddQuoteOpen(true)
@@ -940,7 +1018,7 @@ const Main = ({
           <BottomOverlay src={TopOverlayImage} />
 
           <CoverPhotoImage
-            src='https://firebasestorage.googleapis.com/v0/b/family-gift-85cf0.appspot.com/o/wallpapers%2Fwallpaperflare.com_wallpaper.jpg?alt=media&token=81f5fc30-45ad-4891-a4d3-32a757bb99f7'
+            src='https://i.ibb.co/9nXdSBd/wallpaperflare-com-wallpaper.jpg'
             width="100%"
             height="100%"
           />
@@ -1038,14 +1116,27 @@ const Main = ({
                   >
                     <Form.Field>
                       What's something you'd like to gently remind {followedUsers[0].name} about?
-                      <CardInput
-                        disabled={reminderExists}
-                        value={reminder}
-                        onChange={(e) => {
-                          setReminder(e.target.value)
+                      <div
+                        onClick={() => {
+                          if (reminderExists) {
+                            setReminderExists(false)
+                            setTimeout(() => {
+                              cardInputRef.current.focus()
+                            }, 0)
+                          }
                         }}
-                        className={`${reminderExists ? "animate-in" : ""}`}
-                      />
+                      >
+                        <CardInput
+                          disabled={reminderExists}
+                          value={reminder}
+                          onChange={(e) => {
+                            setReminder(e.target.value)
+                          }}
+                          ref={cardInputRef}
+                          className={`${reminderExists ? "animate-in" : ""}`}
+                          ref={cardInputRef}
+                        />
+                      </div>
                     </Form.Field>
                   </Form>
                 </Card>
@@ -1065,14 +1156,27 @@ const Main = ({
                   >
                     <Form.Field>
                       What's something you've realised recently and want to share with {followedUsers[0].name}?
-                  <CardInput
-                        disabled={musingExists}
-                        value={musing}
-                        onChange={(e) => {
-                          setMusing(e.target.value)
+                  <div
+                        onClick={() => {
+
+                          if (musingExists) {
+                            setMusingExists(false)
+                            setTimeout(() => {
+                              cardInputRef.current.focus()
+                            }, 0)
+                          }
                         }}
-                        className={`${musingExists ? "animate-in" : ""}`}
-                      />
+                      >
+                        <CardInput
+                          disabled={musingExists}
+                          value={musing}
+                          onChange={(e) => {
+                            setMusing(e.target.value)
+                          }}
+                          className={`${musingExists ? "animate-in" : ""}`}
+                          ref={cardInputRef}
+                        />
+                      </div>
                     </Form.Field>
                   </Form>
                 </Card>

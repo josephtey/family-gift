@@ -35,19 +35,19 @@ const App = () => {
         }
       })
     } catch (err) {
-      // setUser({
-      //   email: 'joetey@stanford.edu',
-      //   name: 'Joseph Tey',
-      //   timezone: 'America/Los_Angeles',
-      //   location: 'San Francisco,US'
-      // })
-
       setUser({
-        email: 'tong.tey@gmail.com',
-        name: 'Dad',
-        timezone: 'Australia/Melbourne',
-        location: 'Wheelers Hill, AU'
+        email: 'joetey@stanford.edu',
+        name: 'Joseph Tey',
+        timezone: 'America/Los_Angeles',
+        location: 'San Francisco,US'
       })
+
+      // setUser({
+      //   email: 'tong.tey@gmail.com',
+      //   name: 'Dad',
+      //   timezone: 'Australia/Melbourne',
+      //   location: 'Wheelers Hill, AU'
+      // })
 
       // setUser({
       //   email: 'angela_nyf@yahoo.com',

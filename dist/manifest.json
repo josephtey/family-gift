@@ -7,14 +7,26 @@
     "service_worker": "./background.js"
   },
   "permissions": [
-    "storage",
-    "activeTab",
-    "scripting",
-    "tabs"
+    "storage"
   ],
   "author": "Joseph Tey",
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
-  "short_name": "Center"
+  "short_name": "Center",
+  "action": {
+    "default_title": "Center",
+    "default_icon": {
+      "16": "/images/tree-icon-16.png",
+      "32": "/images/tree-icon-32.png",
+      "48": "/images/tree-icon-48.png",
+      "128": "/images/tree-icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "/images/tree-icon-16.png",
+    "32": "/images/tree-icon-32.png",
+    "48": "/images/tree-icon-48.png",
+    "128": "/images/tree-icon-128.png"
+  }
 }
